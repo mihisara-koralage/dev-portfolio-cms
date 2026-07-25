@@ -216,3 +216,24 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Secrets
+.env
+*.env
+
+# Django
+backend/media/
+backend/staticfiles/
+*.pyc
+__pycache__/
+db.sqlite3
+
+# Terraform
+terraform/.terraform/
+terraform/*.tfstate
+terraform/*.tfstate.backup
+terraform/.terraform.lock.hcl
+
+# OS
+.DS_Store
+Thumbs.db
