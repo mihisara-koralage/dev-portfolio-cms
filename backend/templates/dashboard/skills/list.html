@@ -1,0 +1,147 @@
+{% extends 'dashboard/base.html' %}
+{% block title %}Skills{% endblock %}
+{% block page_title %}Skills{% endblock %}
+{% block page_subtitle %}Manage your skill categories and individual skills{% endblock %}
+
+{% block header_actions %}
+<a href="{% url 'dashboard:skill-create' %}"
+   class="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors">
+    <i class="fa-solid fa-plus"></i> Add Skill
+</a>
+{% endblock %}
+
+{% block content %}
+{% for category in categories %}
+<div class="mb-8">
+
+    <!-- Category header -->
+    <div class="flex items-center justify-between mb-3">
+        <div class="flex items-center gap-3">
+            {% if category.icon %}
+            <i class="{{ category.icon }} text-blue-400"></i>
+            {% endif %}
+            <h2 class="text-lg font-semibold text-white">{{ category.name }}</h2>
+            <span class="text-xs text-gray-500 bg-gray-800 px-2 py-0.5 rounded-full">
+                {{ category.skills.count }} skill{{ category.skills.count|pluralize }}
+            </span>
+        </div>
+    </div>
+
+    <!-- Skills table -->
+    <div class="bg-gray-900 rounded-xl border border-gray-800 overflow-hidden">
+        <table class="w-full">
+            <thead>
+                <tr class="border-b border-gray-800">
+                    <th class="text-left px-6 py-3 text-xs font-semibold text-gray-400 uppercase">Skill</th>
+                    <th class="text-left px-6 py-3 text-xs font-semibold text-gray-400 uppercase">Proficiency</th>
+                    <th class="text-left px-6 py-3 text-xs font-semibold text-gray-400 uppercase">Level</th>
+                    <th class="text-left px-6 py-3 text-xs font-semibold text-gray-400 uppercase">Featured</th>
+                    <th class="text-left px-6 py-3 text-xs font-semibold text-gray-400 uppercase">Order</th>
+                    <th class="px-6 py-3"></th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-800">
+                {% for skill in category.skills.all %}
+                <tr class="hover:bg-gray-800 transition-colors">
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-3">
+                            {% if skill.icon %}
+                            <i class="{{ skill.icon }} text-lg text-gray-300"></i>
+                            {% endif %}
+                            <span class="font-medium text-white">{{ skill.name }}</span>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-28 bg-gray-800 rounded-full h-1.5">
+                                <div class="bg-blue-500 h-1.5 rounded-full"
+                                     style="width: {{ skill.proficiency_percent }}%">
+                                </div>
+                            </div>
+                            <span class="text-sm text-gray-400">{{ skill.proficiency_percent }}%</span>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <span class="px-2 py-1 text-xs rounded-full
+                            {% if skill.proficiency == 'expert' %}bg-purple-900 text-purple-300
+                            {% elif skill.proficiency == 'advanced' %}bg-blue-900 text-blue-300
+                            {% elif skill.proficiency == 'intermediate' %}bg-green-900 text-green-300
+                            {% else %}bg-gray-800 text-gray-400{% endif %}">
+                            {{ skill.get_proficiency_display }}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4">
+                        {% if skill.is_featured %}
+                        <i class="fa-solid fa-star text-yellow-400"></i>
+                        {% else %}
+                        <i class="fa-regular fa-star text-gray-600"></i>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 text-sm text-gray-400">{{ skill.order }}</td>
+                    <td class="px-6 py-4 text-right">
+                        <div class="flex items-center justify-end gap-2">
+                            <a href="{% url 'dashboard:skill-edit' skill.pk %}"
+                               class="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                            </a>
+                            <a href="{% url 'dashboard:skill-delete' skill.pk %}"
+                               class="p-2 text-gray-400 hover:text-red-400 hover:bg-gray-700 rounded-lg transition-colors">
+                                <i class="fa-solid fa-trash"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="px-6 py-8 text-center text-gray-500 text-sm">
+                        No skills in this category yet.
+                        <a href="{% url 'dashboard:skill-create' %}" class="text-blue-400 hover:underline">Add one</a>.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% empty %}
+<div class="bg-gray-900 rounded-xl border border-gray-800 p-12 text-center">
+    <i class="fa-solid fa-star text-gray-600 text-4xl mb-4 block"></i>
+    <p class="text-gray-400 mb-4">No skill categories yet.</p>
+    <a href="{% url 'dashboard:skill-category-create' %}"
+       class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors">
+        <i class="fa-solid fa-plus"></i> Add First Category
+    </a>
+</div>
+{% endfor %}
+
+<!-- Add category inline form -->
+{% if categories %}
+<div class="mt-6 bg-gray-900 rounded-xl border border-gray-800 p-6">
+    <h3 class="font-semibold text-white mb-4">Add New Category</h3>
+    <form method="post" action="{% url 'dashboard:skill-category-create' %}" class="flex items-end gap-4">
+        {% csrf_token %}
+        <div class="flex-1">
+            <label class="block text-sm font-medium text-gray-300 mb-1.5">Category Name</label>
+            <input type="text" name="name" required
+                   placeholder="e.g. Cloud & DevOps"
+                   class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500">
+        </div>
+        <div class="w-40">
+            <label class="block text-sm font-medium text-gray-300 mb-1.5">Slug</label>
+            <input type="text" name="slug"
+                   placeholder="cloud-devops"
+                   class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500">
+        </div>
+        <div class="w-24">
+            <label class="block text-sm font-medium text-gray-300 mb-1.5">Order</label>
+            <input type="number" name="order" value="0"
+                   class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-blue-500">
+        </div>
+        <button type="submit"
+                class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-lg transition-colors whitespace-nowrap">
+            Add Category
+        </button>
+    </form>
+</div>
+{% endif %}
+{% endblock %}

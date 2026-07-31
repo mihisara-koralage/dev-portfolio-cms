@@ -1,0 +1,126 @@
+{% extends 'dashboard/base.html' %}
+{% block title %}{{ page_title }}{% endblock %}
+{% block page_title %}{{ page_title }}{% endblock %}
+{% block page_subtitle %}{% if action == 'Create' %}Add a new certificate or course completion{% else %}Update certificate details{% endif %}{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl">
+    <form method="post" enctype="multipart/form-data" class="space-y-6">
+        {% csrf_token %}
+
+        {% if form.errors %}
+        <div class="bg-red-900 border border-red-700 rounded-lg px-4 py-3 text-red-200 text-sm">
+            Please correct the errors below.
+        </div>
+        {% endif %}
+
+        <!-- Core details -->
+        <div class="bg-gray-900 rounded-xl border border-gray-800 p-6 space-y-5">
+            <h2 class="font-semibold text-white border-b border-gray-800 pb-3">Certificate Details</h2>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-1.5">
+                    Title <span class="text-red-400">*</span>
+                </label>
+                <input type="text" name="title" value="{{ form.title.value|default:'' }}" required
+                       placeholder="e.g. AWS Certified Solutions Architect"
+                       class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500">
+                {% if form.title.errors %}<p class="mt-1 text-sm text-red-400">{{ form.title.errors.0 }}</p>{% endif %}
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-1.5">
+                    Issuing Organization <span class="text-red-400">*</span>
+                </label>
+                <input type="text" name="issuing_organization" value="{{ form.issuing_organization.value|default:'' }}" required
+                       placeholder="e.g. Amazon Web Services, Coursera, Google"
+                       class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500">
+                {% if form.issuing_organization.errors %}<p class="mt-1 text-sm text-red-400">{{ form.issuing_organization.errors.0 }}</p>{% endif %}
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-1.5">
+                        Issue Date <span class="text-red-400">*</span>
+                    </label>
+                    <input type="date" name="issue_date" value="{{ form.issue_date.value|default:'' }}" required
+                           class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-blue-500">
+                    {% if form.issue_date.errors %}<p class="mt-1 text-sm text-red-400">{{ form.issue_date.errors.0 }}</p>{% endif %}
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-1.5">Expiry Date</label>
+                    <input type="date" name="expiry_date" value="{{ form.expiry_date.value|default:'' }}"
+                           class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-blue-500">
+                    <p class="mt-1 text-xs text-gray-500">Leave blank if it does not expire.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Credential -->
+        <div class="bg-gray-900 rounded-xl border border-gray-800 p-6 space-y-5">
+            <h2 class="font-semibold text-white border-b border-gray-800 pb-3">Credential Information</h2>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-1.5">Credential ID</label>
+                <input type="text" name="credential_id" value="{{ form.credential_id.value|default:'' }}"
+                       placeholder="Unique ID provided by the issuer"
+                       class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500">
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-1.5">Credential URL</label>
+                <input type="url" name="credential_url" value="{{ form.credential_url.value|default:'' }}"
+                       placeholder="https://www.credly.com/badges/..."
+                       class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500">
+                <p class="mt-1 text-xs text-gray-500">Public URL to verify the credential online.</p>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-1.5">Certificate Image / Badge</label>
+                {% if form.instance.image %}
+                <div class="mb-3">
+                    <img src="{{ form.instance.image.url }}" alt="Current certificate"
+                         class="h-24 rounded-lg border border-gray-700 object-contain bg-gray-800 p-2">
+                    <p class="text-xs text-gray-500 mt-1">Current image. Upload a new one to replace it.</p>
+                </div>
+                {% endif %}
+                <input type="file" name="image" accept="image/*"
+                       class="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-500 cursor-pointer">
+            </div>
+        </div>
+
+        <!-- Display settings -->
+        <div class="bg-gray-900 rounded-xl border border-gray-800 p-6 space-y-5">
+            <h2 class="font-semibold text-white border-b border-gray-800 pb-3">Display Settings</h2>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-1.5">Order</label>
+                    <input type="number" name="order" value="{{ form.order.value|default:0 }}"
+                           class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-blue-500">
+                    <p class="mt-1 text-xs text-gray-500">Lower numbers appear first.</p>
+                </div>
+                <div class="flex items-end pb-1">
+                    <label class="flex items-center gap-3 cursor-pointer">
+                        <input type="checkbox" name="is_featured"
+                               {% if form.is_featured.value %}checked{% endif %}
+                               class="w-4 h-4 rounded bg-gray-800 border-gray-600 text-blue-500">
+                        <span class="text-sm font-medium text-gray-300">Featured on homepage</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex items-center justify-end gap-4">
+            <a href="{% url 'dashboard:certificate-list' %}"
+               class="px-5 py-2.5 border border-gray-700 text-gray-300 rounded-lg hover:bg-gray-800 transition-colors">
+                Cancel
+            </a>
+            <button type="submit"
+                class="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-lg transition-colors">
+                {{ action }} Certificate
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

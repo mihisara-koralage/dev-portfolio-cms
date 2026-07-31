@@ -1,0 +1,95 @@
+{% extends 'dashboard/base.html' %}
+{% block title %}Certificates{% endblock %}
+{% block page_title %}Certificates{% endblock %}
+{% block page_subtitle %}Your professional certifications and course completions{% endblock %}
+
+{% block header_actions %}
+<a href="{% url 'dashboard:certificate-create' %}"
+   class="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors">
+    <i class="fa-solid fa-plus"></i> Add Certificate
+</a>
+{% endblock %}
+
+{% block content %}
+{% if certificates %}
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    {% for cert in certificates %}
+    <div class="bg-gray-900 rounded-xl border border-gray-800 p-6 flex gap-5">
+
+        <!-- Badge / image -->
+        <div class="flex-shrink-0">
+            {% if cert.image %}
+            <img src="{{ cert.image.url }}" alt="{{ cert.title }}"
+                 class="w-16 h-16 rounded-lg object-cover border border-gray-700">
+            {% else %}
+            <div class="w-16 h-16 bg-gray-800 rounded-lg flex items-center justify-center">
+                <i class="fa-solid fa-certificate text-yellow-400 text-2xl"></i>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Details -->
+        <div class="flex-1 min-w-0">
+            <div class="flex items-start justify-between gap-2">
+                <div class="min-w-0">
+                    <h3 class="font-semibold text-white truncate">{{ cert.title }}</h3>
+                    <p class="text-sm text-gray-400 mt-0.5">{{ cert.issuing_organization }}</p>
+                </div>
+                {% if cert.is_featured %}
+                <i class="fa-solid fa-star text-yellow-400 flex-shrink-0 mt-1" title="Featured"></i>
+                {% endif %}
+            </div>
+
+            <div class="mt-3 flex flex-wrap gap-3 text-xs text-gray-500">
+                <span class="flex items-center gap-1">
+                    <i class="fa-regular fa-calendar"></i>
+                    Issued {{ cert.issue_date|date:"M Y" }}
+                </span>
+                {% if cert.expiry_date %}
+                <span class="flex items-center gap-1">
+                    <i class="fa-regular fa-clock"></i>
+                    Expires {{ cert.expiry_date|date:"M Y" }}
+                </span>
+                {% endif %}
+                {% if cert.credential_id %}
+                <span class="flex items-center gap-1">
+                    <i class="fa-solid fa-fingerprint"></i>
+                    {{ cert.credential_id }}
+                </span>
+                {% endif %}
+            </div>
+
+            {% if cert.credential_url %}
+            <a href="{{ cert.credential_url }}" target="_blank" rel="noopener"
+               class="inline-flex items-center gap-1 mt-3 text-xs text-blue-400 hover:text-blue-300 transition-colors">
+                <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                Verify credential
+            </a>
+            {% endif %}
+        </div>
+
+        <!-- Actions -->
+        <div class="flex flex-col gap-1 flex-shrink-0">
+            <a href="{% url 'dashboard:certificate-edit' cert.pk %}"
+               class="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors">
+                <i class="fa-solid fa-pen-to-square"></i>
+            </a>
+            <a href="{% url 'dashboard:certificate-delete' cert.pk %}"
+               class="p-2 text-gray-400 hover:text-red-400 hover:bg-gray-700 rounded-lg transition-colors">
+                <i class="fa-solid fa-trash"></i>
+            </a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="bg-gray-900 rounded-xl border border-gray-800 p-12 text-center">
+    <i class="fa-solid fa-certificate text-gray-600 text-4xl mb-4 block"></i>
+    <p class="text-gray-400 mb-4">No certificates yet.</p>
+    <a href="{% url 'dashboard:certificate-create' %}"
+       class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors">
+        <i class="fa-solid fa-plus"></i> Add First Certificate
+    </a>
+</div>
+{% endif %}
+{% endblock %}

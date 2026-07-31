@@ -1,0 +1,137 @@
+{% extends 'dashboard/base.html' %}
+{% block title %}{{ page_title }}{% endblock %}
+{% block page_title %}{{ page_title }}{% endblock %}
+{% block page_subtitle %}{% if action == 'Create' %}Add an academic qualification{% else %}Update education details{% endif %}{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl">
+    <form method="post" enctype="multipart/form-data" class="space-y-6">
+        {% csrf_token %}
+
+        {% if form.errors %}
+        <div class="bg-red-900 border border-red-700 rounded-lg px-4 py-3 text-red-200 text-sm">
+            Please correct the errors below.
+        </div>
+        {% endif %}
+
+        <!-- Academic details -->
+        <div class="bg-gray-900 rounded-xl border border-gray-800 p-6 space-y-5">
+            <h2 class="font-semibold text-white border-b border-gray-800 pb-3">Academic Details</h2>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-1.5">
+                    Institution <span class="text-red-400">*</span>
+                </label>
+                <input type="text" name="institution" value="{{ form.institution.value|default:'' }}" required
+                       placeholder="e.g. University of Sri Jayewardenepura"
+                       class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500">
+                {% if form.institution.errors %}<p class="mt-1 text-sm text-red-400">{{ form.institution.errors.0 }}</p>{% endif %}
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-1.5">
+                    Degree <span class="text-red-400">*</span>
+                </label>
+                <input type="text" name="degree" value="{{ form.degree.value|default:'' }}" required
+                       placeholder="e.g. BSc in Computer Science"
+                       class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500">
+                {% if form.degree.errors %}<p class="mt-1 text-sm text-red-400">{{ form.degree.errors.0 }}</p>{% endif %}
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-1.5">Field of Study</label>
+                    <input type="text" name="field_of_study" value="{{ form.field_of_study.value|default:'' }}"
+                           placeholder="e.g. Software Engineering"
+                           class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-1.5">Grade / GPA</label>
+                    <input type="text" name="grade" value="{{ form.grade.value|default:'' }}"
+                           placeholder="e.g. First Class, 3.8 GPA"
+                           class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-1.5">Description</label>
+                <textarea name="description" rows="4"
+                          placeholder="Relevant coursework, achievements, activities..."
+                          class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 resize-y">{{ form.description.value|default:'' }}</textarea>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-1.5">Institution Website</label>
+                <input type="url" name="institution_url" value="{{ form.institution_url.value|default:'' }}"
+                       placeholder="https://www.sjp.ac.lk"
+                       class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500">
+            </div>
+        </div>
+
+        <!-- Dates -->
+        <div class="bg-gray-900 rounded-xl border border-gray-800 p-6 space-y-5">
+            <h2 class="font-semibold text-white border-b border-gray-800 pb-3">Enrollment Period</h2>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-1.5">
+                        Start Date <span class="text-red-400">*</span>
+                    </label>
+                    <input type="date" name="start_date" value="{{ form.start_date.value|default:'' }}" required
+                           class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-blue-500">
+                    {% if form.start_date.errors %}<p class="mt-1 text-sm text-red-400">{{ form.start_date.errors.0 }}</p>{% endif %}
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-1.5">End Date</label>
+                    <input type="date" name="end_date" value="{{ form.end_date.value|default:'' }}"
+                           class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-blue-500">
+                    <p class="mt-1 text-xs text-gray-500">Leave blank if currently enrolled.</p>
+                </div>
+            </div>
+
+            <label class="flex items-center gap-3 cursor-pointer">
+                <input type="checkbox" name="is_current"
+                       {% if form.is_current.value %}checked{% endif %}
+                       class="w-4 h-4 rounded bg-gray-800 border-gray-600 text-blue-500">
+                <span class="text-sm font-medium text-gray-300">Currently enrolled</span>
+            </label>
+        </div>
+
+        <!-- Logo & Order -->
+        <div class="bg-gray-900 rounded-xl border border-gray-800 p-6 space-y-5">
+            <h2 class="font-semibold text-white border-b border-gray-800 pb-3">Display Settings</h2>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-1.5">Institution Logo</label>
+                {% if form.instance.institution_logo %}
+                <div class="mb-3">
+                    <img src="{{ form.instance.institution_logo.url }}" alt="Current logo"
+                         class="h-16 w-16 rounded-lg border border-gray-700 object-contain bg-gray-800 p-2">
+                    <p class="text-xs text-gray-500 mt-1">Upload a new image to replace it.</p>
+                </div>
+                {% endif %}
+                <input type="file" name="institution_logo" accept="image/*"
+                       class="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-500 cursor-pointer">
+            </div>
+
+            <div class="w-32">
+                <label class="block text-sm font-medium text-gray-300 mb-1.5">Order</label>
+                <input type="number" name="order" value="{{ form.order.value|default:0 }}"
+                       class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-blue-500">
+                <p class="mt-1 text-xs text-gray-500">Lower numbers appear first.</p>
+            </div>
+        </div>
+
+        <div class="flex items-center justify-end gap-4">
+            <a href="{% url 'dashboard:education-list' %}"
+               class="px-5 py-2.5 border border-gray-700 text-gray-300 rounded-lg hover:bg-gray-800 transition-colors">
+                Cancel
+            </a>
+            <button type="submit"
+                class="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-lg transition-colors">
+                {{ action }} Education
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

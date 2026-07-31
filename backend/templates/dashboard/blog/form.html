@@ -1,0 +1,320 @@
+{% extends 'dashboard/base.html' %}
+{% block title %}{{ page_title }}{% endblock %}
+{% block page_title %}{{ page_title }}{% endblock %}
+{% block page_subtitle %}{% if action == 'Create' %}Write a new blog post{% else %}Edit post content and settings{% endif %}{% endblock %}
+
+{% block content %}
+<form method="post" enctype="multipart/form-data" id="blog-form">
+    {% csrf_token %}
+
+    {% if form.errors %}
+    <div class="bg-red-900 border border-red-700 rounded-lg px-4 py-3 text-red-200 text-sm mb-6">
+        Please correct the errors below.
+    </div>
+    {% endif %}
+
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+
+        <!-- Left column: main content -->
+        <div class="xl:col-span-2 space-y-6">
+
+            <!-- Title & Slug -->
+            <div class="bg-gray-900 rounded-xl border border-gray-800 p-6 space-y-5">
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-1.5">
+                        Title <span class="text-red-400">*</span>
+                    </label>
+                    <input type="text" name="title" id="post-title"
+                           value="{{ form.title.value|default:'' }}" required
+                           placeholder="Your post title..."
+                           class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 text-lg font-semibold">
+                    {% if form.title.errors %}
+                    <p class="mt-1 text-sm text-red-400">{{ form.title.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-1.5">Slug</label>
+                    <div class="flex gap-2">
+                        <input type="text" name="slug" id="post-slug"
+                               value="{{ form.slug.value|default:'' }}"
+                               placeholder="auto-generated-from-title"
+                               class="flex-1 px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-gray-300 placeholder-gray-500 focus:outline-none focus:border-blue-500 font-mono text-sm">
+                        <button type="button" id="generate-slug"
+                                class="px-3 py-2 bg-gray-700 hover:bg-gray-600 text-gray-300 rounded-lg text-sm transition-colors whitespace-nowrap">
+                            Generate
+                        </button>
+                    </div>
+                    <p class="mt-1 text-xs text-gray-500">URL: /blog/<span id="slug-preview" class="text-blue-400">{{ form.slug.value|default:'...' }}</span>/</p>
+                    {% if form.slug.errors %}
+                    <p class="mt-1 text-sm text-red-400">{{ form.slug.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-1.5">Excerpt</label>
+                    <textarea name="excerpt" rows="3"
+                              placeholder="Short summary shown on the blog listing page..."
+                              class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 resize-none">{{ form.excerpt.value|default:'' }}</textarea>
+                    <p class="mt-1 text-xs text-gray-500">If left blank, the beginning of the content will be used.</p>
+                </div>
+            </div>
+
+            <!-- Content editor -->
+            <div class="bg-gray-900 rounded-xl border border-gray-800 p-6">
+                <label class="block text-sm font-medium text-gray-300 mb-3">
+                    Content <span class="text-red-400">*</span>
+                </label>
+
+                <!-- Editor toolbar -->
+                <div class="flex flex-wrap gap-1 mb-3 p-2 bg-gray-800 rounded-lg border border-gray-700">
+                    <button type="button" onclick="insertMarkdown('**', '**')"
+                            class="px-2 py-1 text-gray-300 hover:bg-gray-700 rounded text-sm font-bold transition-colors" title="Bold">
+                        B
+                    </button>
+                    <button type="button" onclick="insertMarkdown('*', '*')"
+                            class="px-2 py-1 text-gray-300 hover:bg-gray-700 rounded text-sm italic transition-colors" title="Italic">
+                        I
+                    </button>
+                    <button type="button" onclick="insertMarkdown('`', '`')"
+                            class="px-2 py-1 text-gray-300 hover:bg-gray-700 rounded text-sm font-mono transition-colors" title="Inline code">
+                        `
+                    </button>
+                    <div class="w-px bg-gray-700 mx-1"></div>
+                    <button type="button" onclick="insertLinePrefix('## ')"
+                            class="px-2 py-1 text-gray-300 hover:bg-gray-700 rounded text-xs transition-colors" title="Heading 2">
+                        H2
+                    </button>
+                    <button type="button" onclick="insertLinePrefix('### ')"
+                            class="px-2 py-1 text-gray-300 hover:bg-gray-700 rounded text-xs transition-colors" title="Heading 3">
+                        H3
+                    </button>
+                    <div class="w-px bg-gray-700 mx-1"></div>
+                    <button type="button" onclick="insertLinePrefix('- ')"
+                            class="px-2 py-1 text-gray-300 hover:bg-gray-700 rounded text-sm transition-colors" title="Bullet list">
+                        <i class="fa-solid fa-list-ul"></i>
+                    </button>
+                    <button type="button" onclick="insertLinePrefix('1. ')"
+                            class="px-2 py-1 text-gray-300 hover:bg-gray-700 rounded text-sm transition-colors" title="Numbered list">
+                        <i class="fa-solid fa-list-ol"></i>
+                    </button>
+                    <div class="w-px bg-gray-700 mx-1"></div>
+                    <button type="button" onclick="insertMarkdown('[', '](url)')"
+                            class="px-2 py-1 text-gray-300 hover:bg-gray-700 rounded text-sm transition-colors" title="Link">
+                        <i class="fa-solid fa-link"></i>
+                    </button>
+                    <button type="button" onclick="insertLinePrefix('> ')"
+                            class="px-2 py-1 text-gray-300 hover:bg-gray-700 rounded text-sm transition-colors" title="Blockquote">
+                        <i class="fa-solid fa-quote-left"></i>
+                    </button>
+                    <button type="button" onclick="insertCodeBlock()"
+                            class="px-2 py-1 text-gray-300 hover:bg-gray-700 rounded text-xs font-mono transition-colors" title="Code block">
+                        &lt;/&gt;
+                    </button>
+                </div>
+
+                <textarea name="content" id="blog-content-editor" rows="24" required
+                          placeholder="Write your post content here using Markdown..."
+                          class="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-gray-100 placeholder-gray-500 focus:outline-none focus:border-blue-500 font-mono text-sm leading-relaxed resize-y">{{ form.content.value|default:'' }}</textarea>
+
+                <div class="mt-2 flex items-center justify-between">
+                    <p class="text-xs text-gray-500">Markdown is supported.</p>
+                    <p class="text-xs text-gray-500" id="word-count">0 words</p>
+                </div>
+
+                {% if form.content.errors %}
+                <p class="mt-1 text-sm text-red-400">{{ form.content.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+        </div>
+
+        <!-- Right column: settings -->
+        <div class="space-y-6">
+
+            <!-- Publish actions -->
+            <div class="bg-gray-900 rounded-xl border border-gray-800 p-6">
+                <h3 class="font-semibold text-white mb-4">Publishing</h3>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-300 mb-1.5">Status</label>
+                    <select name="status"
+                            class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-blue-500">
+                        {% for value, label in form.fields.status.choices %}
+                        <option value="{{ value }}"
+                            {% if form.status.value == value %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <label class="flex items-center gap-3 cursor-pointer mb-5">
+                    <input type="checkbox" name="is_featured"
+                           {% if form.is_featured.value %}checked{% endif %}
+                           class="w-4 h-4 rounded bg-gray-800 border-gray-600 text-blue-500">
+                    <span class="text-sm font-medium text-gray-300">Featured post</span>
+                </label>
+
+                <div class="flex gap-3">
+                    <button type="submit"
+                            class="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2.5 rounded-lg transition-colors">
+                        {{ action }}
+                    </button>
+                    <a href="{% url 'dashboard:blog-list' %}"
+                       class="px-4 py-2.5 border border-gray-700 text-gray-300 rounded-lg hover:bg-gray-800 transition-colors text-sm">
+                        Cancel
+                    </a>
+                </div>
+            </div>
+
+            <!-- Category & Tags -->
+            <div class="bg-gray-900 rounded-xl border border-gray-800 p-6">
+                <h3 class="font-semibold text-white mb-4">Category & Tags</h3>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-300 mb-1.5">Category</label>
+                    <select name="category"
+                            class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-blue-500">
+                        <option value="">No category</option>
+                        {% for value, label in form.fields.category.choices %}
+                        {% if value %}
+                        <option value="{{ value }}"
+                            {% if form.category.value|stringformat:"s" == value|stringformat:"s" %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                        {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Tags</label>
+                    <div class="space-y-2 max-h-48 overflow-y-auto pr-1">
+                        {% for tag in form.fields.tags.queryset %}
+                        <label class="flex items-center gap-2.5 cursor-pointer group">
+                            <input type="checkbox" name="tags" value="{{ tag.pk }}"
+                                   {% if tag.pk in form.tags.value %}checked{% endif %}
+                                   class="w-4 h-4 rounded bg-gray-800 border-gray-600 text-blue-500">
+                            <span class="text-sm text-gray-300 group-hover:text-white transition-colors">
+                                {{ tag.name }}
+                            </span>
+                        </label>
+                        {% empty %}
+                        <p class="text-xs text-gray-500">No tags yet. Add them through the Django admin.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cover image -->
+            <div class="bg-gray-900 rounded-xl border border-gray-800 p-6">
+                <h3 class="font-semibold text-white mb-4">Cover Image</h3>
+                {% if form.instance.cover_image %}
+                <div class="mb-3">
+                    <img src="{{ form.instance.cover_image.url }}" alt="Current cover"
+                         class="w-full h-36 object-cover rounded-lg border border-gray-700">
+                    <p class="text-xs text-gray-500 mt-1">Upload a new image to replace it.</p>
+                </div>
+                {% endif %}
+                <input type="file" name="cover_image" accept="image/*"
+                       class="w-full text-sm text-gray-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-500 cursor-pointer">
+            </div>
+
+            <!-- SEO -->
+            <div class="bg-gray-900 rounded-xl border border-gray-800 p-6">
+                <h3 class="font-semibold text-white mb-1">SEO</h3>
+                <p class="text-xs text-gray-500 mb-4">Leave blank to use the post title and excerpt.</p>
+
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1.5">Meta Title</label>
+                        <input type="text" name="meta_title"
+                               value="{{ form.meta_title.value|default:'' }}"
+                               placeholder="SEO title (max 200 chars)"
+                               class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1.5">Meta Description</label>
+                        <textarea name="meta_description" rows="3"
+                                  placeholder="SEO description (max 160 chars)"
+                                  class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 text-sm resize-none">{{ form.meta_description.value|default:'' }}</textarea>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</form>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // ── Slug generation ──────────────────────────────────────────
+    function generateSlug(text) {
+        return text
+            .toLowerCase()
+            .trim()
+            .replace(/[^\w\s-]/g, '')
+            .replace(/[\s_-]+/g, '-')
+            .replace(/^-+|-+$/g, '');
+    }
+
+    const titleInput = document.getElementById('post-title');
+    const slugInput  = document.getElementById('post-slug');
+    const slugPreview = document.getElementById('slug-preview');
+
+    document.getElementById('generate-slug').addEventListener('click', () => {
+        const slug = generateSlug(titleInput.value);
+        slugInput.value = slug;
+        slugPreview.textContent = slug || '...';
+    });
+
+    slugInput.addEventListener('input', () => {
+        slugPreview.textContent = slugInput.value || '...';
+    });
+
+    // ── Word count ───────────────────────────────────────────────
+    const contentEditor = document.getElementById('blog-content-editor');
+    const wordCountEl   = document.getElementById('word-count');
+
+    function updateWordCount() {
+        const text  = contentEditor.value.trim();
+        const count = text ? text.split(/\s+/).length : 0;
+        wordCountEl.textContent = count + ' word' + (count !== 1 ? 's' : '');
+    }
+
+    contentEditor.addEventListener('input', updateWordCount);
+    updateWordCount();
+
+    // ── Markdown toolbar helpers ─────────────────────────────────
+    function insertMarkdown(before, after) {
+        const start = contentEditor.selectionStart;
+        const end   = contentEditor.selectionEnd;
+        const selected = contentEditor.value.substring(start, end);
+        const replacement = before + (selected || 'text') + after;
+        contentEditor.setRangeText(replacement, start, end, 'select');
+        contentEditor.focus();
+        updateWordCount();
+    }
+
+    function insertLinePrefix(prefix) {
+        const start = contentEditor.selectionStart;
+        const lineStart = contentEditor.value.lastIndexOf('\n', start - 1) + 1;
+        contentEditor.setRangeText(prefix, lineStart, lineStart, 'end');
+        contentEditor.focus();
+        updateWordCount();
+    }
+
+    function insertCodeBlock() {
+        const start = contentEditor.selectionStart;
+        const end   = contentEditor.selectionEnd;
+        const selected = contentEditor.value.substring(start, end);
+        const block = '\n```\n' + (selected || 'code here') + '\n```\n';
+        contentEditor.setRangeText(block, start, end, 'end');
+        contentEditor.focus();
+        updateWordCount();
+    }
+</script>
+{% endblock %}

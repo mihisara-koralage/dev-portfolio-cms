@@ -1,0 +1,101 @@
+{% extends 'dashboard/base.html' %}
+{% block title %}Education{% endblock %}
+{% block page_title %}Education{% endblock %}
+{% block page_subtitle %}Your academic qualifications and degrees{% endblock %}
+
+{% block header_actions %}
+<a href="{% url 'dashboard:education-create' %}"
+   class="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors">
+    <i class="fa-solid fa-plus"></i> Add Education
+</a>
+{% endblock %}
+
+{% block content %}
+{% if education_list %}
+<div class="space-y-4">
+    {% for edu in education_list %}
+    <div class="bg-gray-900 rounded-xl border border-gray-800 p-6">
+        <div class="flex items-start gap-5">
+
+            <!-- Institution logo -->
+            <div class="flex-shrink-0">
+                {% if edu.institution_logo %}
+                <img src="{{ edu.institution_logo.url }}" alt="{{ edu.institution }}"
+                     class="w-14 h-14 rounded-lg object-cover border border-gray-700">
+                {% else %}
+                <div class="w-14 h-14 bg-gray-800 rounded-lg flex items-center justify-center">
+                    <i class="fa-solid fa-graduation-cap text-gray-500 text-xl"></i>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Details -->
+            <div class="flex-1 min-w-0">
+                <div class="flex items-start justify-between gap-4">
+                    <div>
+                        <h3 class="font-semibold text-white text-lg">{{ edu.degree }}</h3>
+                        <div class="flex items-center gap-2 mt-0.5 flex-wrap">
+                            {% if edu.institution_url %}
+                            <a href="{{ edu.institution_url }}" target="_blank" rel="noopener"
+                               class="text-blue-400 hover:text-blue-300 font-medium">{{ edu.institution }}</a>
+                            {% else %}
+                            <span class="text-gray-300 font-medium">{{ edu.institution }}</span>
+                            {% endif %}
+                            {% if edu.field_of_study %}
+                            <span class="text-gray-500">&middot;</span>
+                            <span class="text-gray-400 text-sm">{{ edu.field_of_study }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    {% if edu.is_current %}
+                    <span class="flex-shrink-0 px-2 py-1 bg-blue-900 text-blue-300 text-xs rounded-full font-medium">
+                        Enrolled
+                    </span>
+                    {% endif %}
+                </div>
+
+                <p class="text-sm text-gray-500 mt-2">
+                    <i class="fa-regular fa-calendar mr-1"></i>
+                    {{ edu.start_date|date:"M Y" }} &mdash;
+                    {% if edu.is_current %}Present{% else %}{{ edu.end_date|date:"M Y" }}{% endif %}
+                </p>
+
+                {% if edu.grade %}
+                <p class="text-sm text-gray-400 mt-1">
+                    <i class="fa-solid fa-award mr-1 text-yellow-500"></i>
+                    {{ edu.grade }}
+                </p>
+                {% endif %}
+
+                {% if edu.description %}
+                <p class="text-gray-400 text-sm mt-3">{{ edu.description|truncatewords:25 }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Actions -->
+            <div class="flex flex-col gap-1 flex-shrink-0">
+                <a href="{% url 'dashboard:education-edit' edu.pk %}"
+                   class="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                </a>
+                <a href="{% url 'dashboard:education-delete' edu.pk %}"
+                   class="p-2 text-gray-400 hover:text-red-400 hover:bg-gray-700 rounded-lg transition-colors">
+                    <i class="fa-solid fa-trash"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="bg-gray-900 rounded-xl border border-gray-800 p-12 text-center">
+    <i class="fa-solid fa-graduation-cap text-gray-600 text-4xl mb-4 block"></i>
+    <p class="text-gray-400 mb-4">No education entries yet.</p>
+    <a href="{% url 'dashboard:education-create' %}"
+       class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors">
+        <i class="fa-solid fa-plus"></i> Add First Entry
+    </a>
+</div>
+{% endif %}
+{% endblock %}

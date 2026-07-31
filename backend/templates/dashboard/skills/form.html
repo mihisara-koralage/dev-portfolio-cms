@@ -1,0 +1,122 @@
+{% extends 'dashboard/base.html' %}
+{% block title %}{{ page_title }}{% endblock %}
+{% block page_title %}{{ page_title }}{% endblock %}
+{% block page_subtitle %}{% if action == 'Create' %}Add a new skill to your profile{% else %}Update skill details{% endif %}{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl">
+    <form method="post" class="space-y-6">
+        {% csrf_token %}
+
+        {% if form.errors %}
+        <div class="bg-red-900 border border-red-700 rounded-lg px-4 py-3 text-red-200 text-sm">
+            Please correct the errors below.
+        </div>
+        {% endif %}
+
+        <div class="bg-gray-900 rounded-xl border border-gray-800 p-6 space-y-5">
+            <h2 class="font-semibold text-white border-b border-gray-800 pb-3">Skill Details</h2>
+
+            <!-- Category -->
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-1.5">
+                    Category <span class="text-red-400">*</span>
+                </label>
+                <select name="category" required
+                        class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-blue-500">
+                    <option value="">Select a category</option>
+                    {% for value, label in form.fields.category.choices %}
+                    {% if value %}
+                    <option value="{{ value }}"
+                        {% if form.category.value|stringformat:"s" == value|stringformat:"s" %}selected{% endif %}>
+                        {{ label }}
+                    </option>
+                    {% endif %}
+                    {% endfor %}
+                </select>
+                {% if form.category.errors %}
+                <p class="mt-1 text-sm text-red-400">{{ form.category.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Name -->
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-1.5">
+                    Skill Name <span class="text-red-400">*</span>
+                </label>
+                <input type="text" name="name" value="{{ form.name.value|default:'' }}" required
+                       placeholder="e.g. Docker, Python, AWS EC2"
+                       class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500">
+                {% if form.name.errors %}
+                <p class="mt-1 text-sm text-red-400">{{ form.name.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Icon -->
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-1.5">Icon Class</label>
+                <input type="text" name="icon" value="{{ form.icon.value|default:'' }}"
+                       placeholder="e.g. devicon-python-plain or fa-brands fa-docker"
+                       class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-blue-500">
+                <p class="mt-1 text-xs text-gray-500">Use Devicons or Font Awesome class names.</p>
+            </div>
+
+            <!-- Proficiency level and percent side by side -->
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-1.5">
+                        Level <span class="text-red-400">*</span>
+                    </label>
+                    <select name="proficiency"
+                            class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-blue-500">
+                        {% for value, label in form.fields.proficiency.choices %}
+                        <option value="{{ value }}"
+                            {% if form.proficiency.value == value %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-1.5">
+                        Proficiency % <span class="text-red-400">*</span>
+                    </label>
+                    <input type="number" name="proficiency_percent"
+                           value="{{ form.proficiency_percent.value|default:50 }}"
+                           min="0" max="100"
+                           class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-blue-500">
+                </div>
+            </div>
+
+            <!-- Order and Featured side by side -->
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-1.5">Order</label>
+                    <input type="number" name="order" value="{{ form.order.value|default:0 }}"
+                           class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-blue-500">
+                    <p class="mt-1 text-xs text-gray-500">Lower numbers appear first.</p>
+                </div>
+                <div class="flex items-end pb-1">
+                    <label class="flex items-center gap-3 cursor-pointer">
+                        <input type="checkbox" name="is_featured"
+                               {% if form.is_featured.value %}checked{% endif %}
+                               class="w-4 h-4 rounded bg-gray-800 border-gray-600 text-blue-500">
+                        <span class="text-sm font-medium text-gray-300">Featured on homepage</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex items-center justify-end gap-4">
+            <a href="{% url 'dashboard:skill-list' %}"
+               class="px-5 py-2.5 border border-gray-700 text-gray-300 rounded-lg hover:bg-gray-800 transition-colors">
+                Cancel
+            </a>
+            <button type="submit"
+                class="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-lg transition-colors">
+                {{ action }} Skill
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

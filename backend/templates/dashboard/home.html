@@ -1,0 +1,85 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}Overview{% endblock %}
+{% block page_title %}Overview{% endblock %}
+{% block page_subtitle %}Welcome back, {{ user.get_full_name|default:user.username }}{% endblock %}
+
+{% block content %}
+
+<!-- Stats grid -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+
+    {% include 'dashboard/partials/stat_card.html' with icon='fa-folder-open' color='blue' label='Projects' value=stats.projects %}
+    {% include 'dashboard/partials/stat_card.html' with icon='fa-star' color='yellow' label='Skills' value=stats.skills %}
+    {% include 'dashboard/partials/stat_card.html' with icon='fa-certificate' color='green' label='Certificates' value=stats.certificates %}
+    {% include 'dashboard/partials/stat_card.html' with icon='fa-envelope' color='red' label='Unread Messages' value=stats.unread %}
+
+</div>
+
+<!-- Blog stats row -->
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
+    {% include 'dashboard/partials/stat_card.html' with icon='fa-pen-nib' color='purple' label='Total Posts' value=stats.blog_posts %}
+    {% include 'dashboard/partials/stat_card.html' with icon='fa-circle-check' color='green' label='Published' value=stats.published_posts %}
+    {% include 'dashboard/partials/stat_card.html' with icon='fa-clock' color='yellow' label='Drafts' value=stats.draft_posts %}
+</div>
+
+<!-- Recent activity -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+    <!-- Unread messages -->
+    <div class="bg-gray-900 rounded-xl border border-gray-800 p-6">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="font-semibold text-white">Unread Messages</h2>
+            <a href="{% url 'dashboard:contact-list' %}?status=unread"
+               class="text-sm text-blue-400 hover:text-blue-300">View all</a>
+        </div>
+        {% if recent_messages %}
+            <div class="space-y-3">
+                {% for msg in recent_messages %}
+                <a href="{% url 'dashboard:contact-detail' msg.pk %}"
+                   class="flex items-start gap-3 p-3 rounded-lg hover:bg-gray-800 transition-colors block">
+                    <div class="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
+                    <div class="min-w-0">
+                        <p class="text-sm font-medium text-white truncate">{{ msg.name }}</p>
+                        <p class="text-xs text-gray-400 truncate">{{ msg.subject }}</p>
+                        <p class="text-xs text-gray-500">{{ msg.created_at|timesince }} ago</p>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-gray-500 text-sm">No unread messages.</p>
+        {% endif %}
+    </div>
+
+    <!-- Recent posts -->
+    <div class="bg-gray-900 rounded-xl border border-gray-800 p-6">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="font-semibold text-white">Recent Posts</h2>
+            <a href="{% url 'dashboard:blog-list' %}"
+               class="text-sm text-blue-400 hover:text-blue-300">View all</a>
+        </div>
+        {% if recent_posts %}
+            <div class="space-y-3">
+                {% for post in recent_posts %}
+                <a href="{% url 'dashboard:blog-edit' post.pk %}"
+                   class="flex items-start gap-3 p-3 rounded-lg hover:bg-gray-800 transition-colors block">
+                    <span class="inline-flex px-2 py-0.5 text-xs rounded-full flex-shrink-0 mt-0.5
+                        {% if post.status == 'published' %}bg-green-900 text-green-300
+                        {% else %}bg-yellow-900 text-yellow-300{% endif %}">
+                        {{ post.status }}
+                    </span>
+                    <div class="min-w-0">
+                        <p class="text-sm font-medium text-white truncate">{{ post.title }}</p>
+                        <p class="text-xs text-gray-500">{{ post.created_at|timesince }} ago</p>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-gray-500 text-sm">No posts yet.</p>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

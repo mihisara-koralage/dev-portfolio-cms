@@ -10,6 +10,7 @@ admin.site.index_title = "Dashboard"
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('dashboard/', include('apps.dashboard.urls', namespace='dashboard')),
 ]
 
 # Serve media files in development
