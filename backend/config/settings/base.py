@@ -24,6 +24,8 @@ DJANGO_APPS = [
 THIRD_PARTY_APPS = [
     'rest_framework',
     'corsheaders',
+    'drf_spectacular',
+    'django_filters',
 ]
 
 LOCAL_APPS = [
@@ -33,6 +35,7 @@ LOCAL_APPS = [
     'apps.blog',
     'apps.contact',
     'apps.dashboard', 
+    'apps.api',
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -113,6 +116,36 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticatedOrReadOnly',
     ],
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+    ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 10,
+    'PAGE_SIZE': 12,
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend',
+        'rest_framework.filters.SearchFilter',
+        'rest_framework.filters.OrderingFilter',
+    ],
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Developer Portfolio API',
+    'DESCRIPTION': (
+        'REST API for the Developer Portfolio CMS. '
+        'Provides public read-only access to portfolio data.'
+    ),
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    'COMPONENT_SPLIT_REQUEST': True,
+    'TAGS': [
+        {'name': 'Profile',      'description': 'Site owner profile and social links'},
+        {'name': 'Projects',     'description': 'Portfolio projects'},
+        {'name': 'Skills',       'description': 'Skills and categories'},
+        {'name': 'Certificates', 'description': 'Professional certifications'},
+        {'name': 'Experience',   'description': 'Work experience'},
+        {'name': 'Education',    'description': 'Academic qualifications'},
+        {'name': 'Blog',         'description': 'Blog posts and categories'},
+        {'name': 'Contact',      'description': 'Contact form submission'},
+    ],
 }
