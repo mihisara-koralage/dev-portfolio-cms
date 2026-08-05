@@ -1,0 +1,41 @@
+<article class="group bg-slate-900 rounded-xl border border-slate-800 overflow-hidden hover:border-primary-600/50 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-primary-600/10 flex flex-col">
+
+    {% if post.cover_image %}
+    <div class="h-48 overflow-hidden">
+        <img src="{{ post.cover_image.url }}" alt="{{ post.title }}"
+             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+    </div>
+    {% endif %}
+
+    <div class="p-5 flex flex-col flex-1">
+        <!-- Meta -->
+        <div class="flex items-center gap-3 mb-3">
+            {% if post.category %}
+            <span class="px-2 py-0.5 bg-primary-600/20 text-primary-400 text-xs font-medium rounded-md">
+                {{ post.category.name }}
+            </span>
+            {% endif %}
+            <span class="text-slate-500 text-xs">
+                {{ post.reading_time }} min read
+            </span>
+        </div>
+
+        <h3 class="font-bold text-white text-lg mb-2 group-hover:text-primary-400 transition-colors leading-snug">
+            <a href="{% url 'public:blog-detail' post.slug %}">{{ post.title }}</a>
+        </h3>
+
+        <p class="text-slate-400 text-sm leading-relaxed mb-4 flex-1">
+            {{ post.excerpt|default:post.content|striptags|truncatewords:20 }}
+        </p>
+
+        <div class="flex items-center justify-between pt-3 border-t border-slate-800">
+            <span class="text-slate-500 text-xs">
+                {{ post.published_at|date:"M d, Y" }}
+            </span>
+            <a href="{% url 'public:blog-detail' post.slug %}"
+               class="text-primary-400 hover:text-primary-300 text-sm font-medium transition-colors flex items-center gap-1">
+                Read more <i class="fa-solid fa-arrow-right text-xs"></i>
+            </a>
+        </div>
+    </div>
+</article>

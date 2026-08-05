@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en" id="html-root">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- SEO -->
+    <title>{% block meta_title %}{{ site_profile.full_name|default:"Developer Portfolio" }}{% endblock %} | {% block meta_site_name %}Portfolio{% endblock %}</title>
+    <meta name="description" content="{% block meta_description %}{{ site_profile.meta_description|default:"A developer portfolio." }}{% endblock %}">
+    <meta name="author" content="{{ site_profile.full_name|default:'' }}">
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="{% block og_title %}{{ site_profile.full_name|default:"Portfolio" }}{% endblock %}">
+    <meta property="og:description" content="{{ site_profile.meta_description|default:'' }}">
+    <meta property="og:type" content="website">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50:  '#eff6ff',
+                            100: '#dbeafe',
+                            400: '#60a5fa',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
+                    },
+                    animation: {
+                        'fade-in-up': 'fadeInUp 0.6s ease-out forwards',
+                        'fade-in':    'fadeIn 0.5s ease-out forwards',
+                    },
+                    keyframes: {
+                        fadeInUp: {
+                            '0%':   { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        fadeIn: {
+                            '0%':   { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <!-- Base styles -->
+    <style>
+        body { font-family: 'Inter', system-ui, sans-serif; }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+
+        /* Smooth scroll */
+        html { scroll-behavior: smooth; }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #3b82f6; }
+
+        /* Animate on scroll */
+        .aos { opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease, transform 0.6s ease; }
+        .aos.visible { opacity: 1; transform: translateY(0); }
+
+        /* Gradient text */
+        .gradient-text {
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Dark mode base */
+        .dark body { background-color: #0a0f1e; color: #e2e8f0; }
+    </style>
+
+    {% block extra_head %}{% endblock %}
+</head>
+
+<body class="bg-slate-950 text-slate-100 antialiased transition-colors duration-300">
+
+<!-- ── Navigation ── -->
+<nav class="fixed top-0 left-0 right-0 z-50 bg-slate-950/80 backdrop-blur-md border-b border-slate-800/50 transition-all duration-300" id="navbar">
+    <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+
+        <!-- Logo -->
+        <a href="{% url 'public:home' %}" class="flex items-center gap-2 group">
+            <div class="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center group-hover:bg-primary-500 transition-colors">
+                <i class="fa-solid fa-code text-white text-sm"></i>
+            </div>
+            <span class="font-bold text-white text-lg mono">
+                {{ site_profile.full_name|default:"Portfolio" }}
+            </span>
+        </a>
+
+        <!-- Desktop nav -->
+        <div class="hidden md:flex items-center gap-8">
+            <a href="{% url 'public:home' %}#about"        class="nav-link text-sm text-slate-400 hover:text-white transition-colors">About</a>
+            <a href="{% url 'public:home' %}#skills"       class="nav-link text-sm text-slate-400 hover:text-white transition-colors">Skills</a>
+            <a href="{% url 'public:project-list' %}"      class="nav-link text-sm text-slate-400 hover:text-white transition-colors">Projects</a>
+            <a href="{% url 'public:certificate-list' %}"  class="nav-link text-sm text-slate-400 hover:text-white transition-colors">Certificates</a>
+            <a href="{% url 'public:blog-list' %}"         class="nav-link text-sm text-slate-400 hover:text-white transition-colors">Blog</a>
+            <a href="{% url 'public:contact' %}"
+               class="px-4 py-2 bg-primary-600 hover:bg-primary-500 text-white text-sm font-semibold rounded-lg transition-colors">
+                Contact
+            </a>
+        </div>
+
+        <!-- Mobile menu button -->
+        <button id="mobile-menu-btn"
+                class="md:hidden p-2 text-slate-400 hover:text-white transition-colors">
+            <i class="fa-solid fa-bars text-xl" id="menu-icon"></i>
+        </button>
+    </div>
+
+    <!-- Mobile menu -->
+    <div id="mobile-menu"
+         class="hidden md:hidden border-t border-slate-800 bg-slate-950 px-6 py-4 space-y-3">
+        <a href="{% url 'public:home' %}#about"       class="block text-slate-400 hover:text-white py-2 transition-colors">About</a>
+        <a href="{% url 'public:home' %}#skills"      class="block text-slate-400 hover:text-white py-2 transition-colors">Skills</a>
+        <a href="{% url 'public:project-list' %}"     class="block text-slate-400 hover:text-white py-2 transition-colors">Projects</a>
+        <a href="{% url 'public:certificate-list' %}" class="block text-slate-400 hover:text-white py-2 transition-colors">Certificates</a>
+        <a href="{% url 'public:blog-list' %}"        class="block text-slate-400 hover:text-white py-2 transition-colors">Blog</a>
+        <a href="{% url 'public:contact' %}"          class="block text-slate-400 hover:text-white py-2 transition-colors">Contact</a>
+    </div>
+</nav>
+
+<!-- Page content -->
+<main class="pt-16">
+    {% block content %}{% endblock %}
+</main>
+
+<!-- ── Footer ── -->
+<footer class="bg-slate-900 border-t border-slate-800 mt-24">
+    <div class="max-w-6xl mx-auto px-6 py-12">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+
+            <!-- Brand -->
+            <div>
+                <div class="flex items-center gap-2 mb-4">
+                    <div class="w-7 h-7 bg-primary-600 rounded-md flex items-center justify-center">
+                        <i class="fa-solid fa-code text-white text-xs"></i>
+                    </div>
+                    <span class="font-bold text-white mono">
+                        {{ site_profile.full_name|default:"Portfolio" }}
+                    </span>
+                </div>
+                <p class="text-slate-400 text-sm leading-relaxed">
+                    {{ site_profile.title|default:"Software & DevOps Engineer" }}
+                </p>
+                {% if site_profile.location %}
+                <p class="text-slate-500 text-sm mt-2">
+                    <i class="fa-solid fa-location-dot mr-1.5"></i>{{ site_profile.location }}
+                </p>
+                {% endif %}
+            </div>
+
+            <!-- Quick links -->
+            <div>
+                <h3 class="font-semibold text-white mb-4 text-sm uppercase tracking-wider">Navigation</h3>
+                <ul class="space-y-2">
+                    <li><a href="{% url 'public:project-list' %}"     class="text-slate-400 hover:text-white text-sm transition-colors">Projects</a></li>
+                    <li><a href="{% url 'public:certificate-list' %}" class="text-slate-400 hover:text-white text-sm transition-colors">Certificates</a></li>
+                    <li><a href="{% url 'public:blog-list' %}"        class="text-slate-400 hover:text-white text-sm transition-colors">Blog</a></li>
+                    <li><a href="{% url 'public:contact' %}"          class="text-slate-400 hover:text-white text-sm transition-colors">Contact</a></li>
+                    {% if site_profile.has_resume %}
+                    <li><a href="{% url 'public:resume' %}"           class="text-slate-400 hover:text-white text-sm transition-colors">Resume</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+
+            <!-- Social links -->
+            <div>
+                <h3 class="font-semibold text-white mb-4 text-sm uppercase tracking-wider">Connect</h3>
+                <div class="flex gap-3">
+                    {% if site_profile.github_url %}
+                    <a href="{{ site_profile.github_url }}" target="_blank" rel="noopener"
+                       class="w-9 h-9 bg-slate-800 hover:bg-primary-600 rounded-lg flex items-center justify-center text-slate-400 hover:text-white transition-all">
+                        <i class="fa-brands fa-github"></i>
+                    </a>
+                    {% endif %}
+                    {% if site_profile.linkedin_url %}
+                    <a href="{{ site_profile.linkedin_url }}" target="_blank" rel="noopener"
+                       class="w-9 h-9 bg-slate-800 hover:bg-primary-600 rounded-lg flex items-center justify-center text-slate-400 hover:text-white transition-all">
+                        <i class="fa-brands fa-linkedin-in"></i>
+                    </a>
+                    {% endif %}
+                    {% if site_profile.twitter_url %}
+                    <a href="{{ site_profile.twitter_url }}" target="_blank" rel="noopener"
+                       class="w-9 h-9 bg-slate-800 hover:bg-primary-600 rounded-lg flex items-center justify-center text-slate-400 hover:text-white transition-all">
+                        <i class="fa-brands fa-twitter"></i>
+                    </a>
+                    {% endif %}
+                    {% if site_profile.email %}
+                    <a href="mailto:{{ site_profile.email }}"
+                       class="w-9 h-9 bg-slate-800 hover:bg-primary-600 rounded-lg flex items-center justify-center text-slate-400 hover:text-white transition-all">
+                        <i class="fa-solid fa-envelope"></i>
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="border-t border-slate-800 pt-6 flex flex-col md:flex-row items-center justify-between gap-4">
+            <p class="text-slate-500 text-sm">
+                &copy; {% now "Y" %} {{ site_profile.full_name|default:"Portfolio" }}. Built with Django &amp; Tailwind CSS.
+            </p>
+            <a href="{% url 'dashboard:login' %}"
+               class="text-slate-700 hover:text-slate-500 text-xs transition-colors">
+                Admin
+            </a>
+        </div>
+    </div>
+</footer>
+
+<!-- ── Global JS ── -->
+<script>
+    // Mobile menu toggle
+    const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+    const mobileMenu    = document.getElementById('mobile-menu');
+    const menuIcon      = document.getElementById('menu-icon');
+
+    mobileMenuBtn.addEventListener('click', () => {
+        mobileMenu.classList.toggle('hidden');
+        menuIcon.className = mobileMenu.classList.contains('hidden')
+            ? 'fa-solid fa-bars text-xl'
+            : 'fa-solid fa-xmark text-xl';
+    });
+
+    // Navbar scroll effect
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 20) {
+            navbar.classList.add('shadow-lg', 'shadow-black/20');
+        } else {
+            navbar.classList.remove('shadow-lg', 'shadow-black/20');
+        }
+    });
+
+    // Animate on scroll (AOS)
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+            }
+        });
+    }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+    document.querySelectorAll('.aos').forEach(el => observer.observe(el));
+</script>
+
+{% block extra_js %}{% endblock %}
+</body>
+</html>

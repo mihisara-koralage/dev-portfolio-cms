@@ -15,14 +15,15 @@ admin.site.index_title = "Dashboard"
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('dashboard/', include('apps.dashboard.urls', namespace='dashboard')),
-
-    # API
     path('api/', include('apps.api.urls', namespace='api')),
 
     # API Documentation
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
     path('api/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
+
+    # Public frontend — registered last so it catches /
+    path('', include('apps.public.urls', namespace='public')),
 ]
 
 if settings.DEBUG:

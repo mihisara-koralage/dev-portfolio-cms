@@ -1,0 +1,76 @@
+<div class="group bg-slate-900 rounded-xl border border-slate-800 overflow-hidden hover:border-primary-600/50 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-primary-600/10 flex flex-col">
+
+    <!-- Thumbnail -->
+    <div class="relative h-48 bg-slate-800 overflow-hidden">
+        {% if project.thumbnail %}
+        <img src="{{ project.thumbnail.url }}" alt="{{ project.title }}"
+             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+        {% else %}
+        <div class="w-full h-full flex items-center justify-center">
+            <i class="fa-solid fa-folder-open text-slate-600 text-5xl"></i>
+        </div>
+        {% endif %}
+
+        <!-- Status badge -->
+        <div class="absolute top-3 right-3">
+            <span class="px-2 py-1 text-xs font-medium rounded-full
+                {% if project.status == 'completed' %}bg-green-900/80 text-green-300
+                {% elif project.status == 'in_progress' %}bg-blue-900/80 text-blue-300
+                {% else %}bg-slate-800/80 text-slate-400{% endif %}">
+                {{ project.get_status_display }}
+            </span>
+        </div>
+
+        {% if project.is_featured %}
+        <div class="absolute top-3 left-3">
+            <span class="px-2 py-1 text-xs font-medium rounded-full bg-yellow-900/80 text-yellow-300">
+                <i class="fa-solid fa-star mr-1"></i>Featured
+            </span>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Content -->
+    <div class="p-5 flex flex-col flex-1">
+        <h3 class="font-bold text-white text-lg mb-2 group-hover:text-primary-400 transition-colors">
+            <a href="{% url 'public:project-detail' project.slug %}">{{ project.title }}</a>
+        </h3>
+        <p class="text-slate-400 text-sm leading-relaxed mb-4 flex-1">
+            {{ project.short_description }}
+        </p>
+
+        <!-- Skills -->
+        {% if project.skills.all %}
+        <div class="flex flex-wrap gap-1.5 mb-4">
+            {% for skill in project.skills.all|slice:":5" %}
+            <span class="px-2 py-0.5 bg-slate-800 text-slate-300 text-xs rounded-md border border-slate-700">
+                {{ skill.name }}
+            </span>
+            {% endfor %}
+            {% if project.skills.count > 5 %}
+            <span class="px-2 py-0.5 text-slate-500 text-xs">+{{ project.skills.count|add:"-5" }} more</span>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- Links -->
+        <div class="flex items-center gap-3 pt-3 border-t border-slate-800">
+            <a href="{% url 'public:project-detail' project.slug %}"
+               class="flex-1 text-center py-1.5 text-sm text-primary-400 hover:text-primary-300 font-medium transition-colors">
+                View Details
+            </a>
+            {% if project.github_url %}
+            <a href="{{ project.github_url }}" target="_blank" rel="noopener"
+               class="p-1.5 text-slate-400 hover:text-white transition-colors" title="GitHub">
+                <i class="fa-brands fa-github"></i>
+            </a>
+            {% endif %}
+            {% if project.live_url %}
+            <a href="{{ project.live_url }}" target="_blank" rel="noopener"
+               class="p-1.5 text-slate-400 hover:text-white transition-colors" title="Live Demo">
+                <i class="fa-solid fa-arrow-up-right-from-square"></i>
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
