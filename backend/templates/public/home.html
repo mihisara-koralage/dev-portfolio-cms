@@ -1,0 +1,595 @@
+{% extends 'public/base.html' %}
+{% load public_tags %}
+
+{% block meta_title %}{{ site_profile.full_name|default:"Developer Portfolio" }}{% endblock %}
+{% block meta_description %}{{ site_profile.meta_description|default:"Full Stack Developer and DevOps Engineer
+portfolio." }}{% endblock %}
+
+{% block content %}
+
+<!-- ============================================================
+     HERO
+     ============================================================ -->
+<section id="hero" class="relative min-h-screen flex items-center justify-center overflow-hidden bg-slate-950">
+
+    <!-- Background grid -->
+    <div class="absolute inset-0 opacity-20"
+        style="background-image: linear-gradient(rgba(59,130,246,0.15) 1px, transparent 1px), linear-gradient(90deg, rgba(59,130,246,0.15) 1px, transparent 1px); background-size: 50px 50px;">
+    </div>
+
+    <!-- Glow -->
+    <div
+        class="absolute top-1/4 left-1/2 -translate-x-1/2 w-96 h-96 bg-primary-600/20 rounded-full blur-3xl pointer-events-none">
+    </div>
+
+    <div class="relative max-w-6xl mx-auto px-6 py-24 text-center">
+
+        <!-- Status badge -->
+        <div
+            class="inline-flex items-center gap-2 px-4 py-2 bg-slate-900 border border-slate-700 rounded-full text-sm text-slate-300 mb-8 aos">
+            <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+            Available for opportunities
+        </div>
+
+        <!-- Name -->
+        <h1 class="text-5xl md:text-7xl font-extrabold text-white mb-4 leading-tight aos">
+            Hi, I'm
+            <span class="gradient-text block mt-1">
+                {{ site_profile.full_name|default:"Your Name" }}
+            </span>
+        </h1>
+
+        <!-- Title -->
+        <div class="text-xl md:text-2xl text-slate-400 mb-6 aos mono" id="typed-title">
+            {{ site_profile.title|default:"Software Engineer & DevOps Engineer" }}
+        </div>
+
+        <!-- Location -->
+        {% if site_profile.location %}
+        <p class="text-slate-500 mb-8 aos">
+            <i class="fa-solid fa-location-dot mr-1.5 text-primary-400"></i>
+            {{ site_profile.location }}
+        </p>
+        {% endif %}
+
+        <!-- CTA buttons -->
+        <div class="flex flex-wrap items-center justify-center gap-4 mb-10 aos">
+            <a href="{% url 'public:project-list' %}"
+                class="px-6 py-3 bg-primary-600 hover:bg-primary-500 text-white font-semibold rounded-xl transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary-600/30">
+                <i class="fa-solid fa-folder-open mr-2"></i>View Projects
+            </a>
+            {% if site_profile.has_resume %}
+            <a href="{% url 'public:resume' %}"
+                class="px-6 py-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white font-semibold rounded-xl transition-all duration-300 hover:-translate-y-0.5">
+                <i class="fa-solid fa-download mr-2"></i>Download Resume
+            </a>
+            {% endif %}
+            <a href="{% url 'public:contact' %}"
+                class="px-6 py-3 border border-slate-700 hover:border-primary-500 text-slate-300 hover:text-white font-semibold rounded-xl transition-all duration-300 hover:-translate-y-0.5">
+                <i class="fa-solid fa-envelope mr-2"></i>Contact Me
+            </a>
+        </div>
+
+        <!-- Social links -->
+        <div class="flex items-center justify-center gap-4 aos">
+            {% if site_profile.github_url %}
+            <a href="{{ site_profile.github_url }}" target="_blank" rel="noopener"
+                class="flex items-center gap-2 text-slate-400 hover:text-white transition-colors group">
+                <i class="fa-brands fa-github text-xl group-hover:text-primary-400 transition-colors"></i>
+                <span class="text-sm hidden sm:inline">GitHub</span>
+            </a>
+            {% endif %}
+            {% if site_profile.linkedin_url %}
+            <span class="text-slate-700">|</span>
+            <a href="{{ site_profile.linkedin_url }}" target="_blank" rel="noopener"
+                class="flex items-center gap-2 text-slate-400 hover:text-white transition-colors group">
+                <i class="fa-brands fa-linkedin text-xl group-hover:text-primary-400 transition-colors"></i>
+                <span class="text-sm hidden sm:inline">LinkedIn</span>
+            </a>
+            {% endif %}
+            {% if site_profile.email %}
+            <span class="text-slate-700">|</span>
+            <a href="mailto:{{ site_profile.email }}"
+                class="flex items-center gap-2 text-slate-400 hover:text-white transition-colors group">
+                <i class="fa-solid fa-envelope text-xl group-hover:text-primary-400 transition-colors"></i>
+                <span class="text-sm hidden sm:inline">{{ site_profile.email }}</span>
+            </a>
+            {% endif %}
+        </div>
+
+        <!-- Scroll indicator -->
+        <div class="absolute bottom-10 left-1/2 -translate-x-1/2 animate-bounce">
+            <a href="#about" class="text-slate-600 hover:text-slate-400 transition-colors">
+                <i class="fa-solid fa-chevron-down text-xl"></i>
+            </a>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================================
+     ABOUT
+     ============================================================ -->
+<section id="about" class="py-24 bg-slate-950">
+    <div class="max-w-6xl mx-auto px-6">
+
+        {% include 'public/partials/section_header.html' with label="About Me" title="Who I Am" subtitle="" %}
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+
+            <!-- Profile picture -->
+            <div class="flex justify-center aos">
+                <div class="relative">
+                    <div
+                        class="w-72 h-72 rounded-2xl overflow-hidden border-2 border-primary-600/30 shadow-2xl shadow-primary-600/10">
+                        {% if site_profile.profile_picture %}
+                        <img src="{{ site_profile.profile_picture.url }}" alt="{{ site_profile.full_name }}"
+                            class="w-full h-full object-cover">
+                        {% else %}
+                        <div class="w-full h-full bg-slate-800 flex items-center justify-center">
+                            <i class="fa-solid fa-user text-slate-600 text-8xl"></i>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <!-- Floating badge -->
+                    <div
+                        class="absolute -bottom-4 -right-4 bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 shadow-xl">
+                        <p class="text-2xl font-bold text-white">
+                            {% if site_profile.years_of_experience %}
+                            {{ site_profile.years_of_experience }}+
+                            {% else %}
+                            🚀
+                            {% endif %}
+                        </p>
+                        <p class="text-xs text-slate-400">
+                            {% if site_profile.years_of_experience %}Years Exp.{% else %}Building{% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bio -->
+            <div class="aos">
+                <h3 class="text-2xl font-bold text-white mb-2">
+                    {{ site_profile.title|default:"Software & DevOps Engineer" }}
+                </h3>
+                {% if site_profile.location %}
+                <p class="text-primary-400 text-sm mb-6 flex items-center gap-1.5">
+                    <i class="fa-solid fa-location-dot"></i>
+                    {{ site_profile.location }}
+                </p>
+                {% endif %}
+
+                <div class="text-slate-400 leading-relaxed space-y-4 mb-8">
+                    {% if site_profile.bio %}
+                    {{ site_profile.bio|linebreaksbr }}
+                    {% else %}
+                    <p>Welcome to my portfolio. I build software and manage infrastructure.</p>
+                    {% endif %}
+                </div>
+
+                <!-- Stats row -->
+                <div class="grid grid-cols-3 gap-4 mb-8">
+                    <div class="text-center p-4 bg-slate-900 rounded-xl border border-slate-800">
+                        <p class="text-2xl font-bold text-primary-400">{{ featured_projects.count }}+</p>
+                        <p class="text-xs text-slate-400 mt-1">Projects</p>
+                    </div>
+                    <div class="text-center p-4 bg-slate-900 rounded-xl border border-slate-800">
+                        <p class="text-2xl font-bold text-primary-400">{{ featured_certificates.count }}+</p>
+                        <p class="text-xs text-slate-400 mt-1">Certificates</p>
+                    </div>
+                    <div class="text-center p-4 bg-slate-900 rounded-xl border border-slate-800">
+                        <p class="text-2xl font-bold text-primary-400">{{ skill_categories.count }}+</p>
+                        <p class="text-xs text-slate-400 mt-1">Skill Areas</p>
+                    </div>
+                </div>
+
+                <!-- Action links -->
+                <div class="flex flex-wrap gap-3">
+                    {% if site_profile.github_url %}
+                    <a href="{{ site_profile.github_url }}" target="_blank" rel="noopener"
+                        class="flex items-center gap-2 px-4 py-2 bg-slate-900 border border-slate-700 hover:border-primary-500 text-slate-300 hover:text-white rounded-lg text-sm transition-all">
+                        <i class="fa-brands fa-github"></i> GitHub
+                    </a>
+                    {% endif %}
+                    {% if site_profile.linkedin_url %}
+                    <a href="{{ site_profile.linkedin_url }}" target="_blank" rel="noopener"
+                        class="flex items-center gap-2 px-4 py-2 bg-slate-900 border border-slate-700 hover:border-primary-500 text-slate-300 hover:text-white rounded-lg text-sm transition-all">
+                        <i class="fa-brands fa-linkedin"></i> LinkedIn
+                    </a>
+                    {% endif %}
+                    {% if site_profile.has_resume %}
+                    <a href="{% url 'public:resume' %}"
+                        class="flex items-center gap-2 px-4 py-2 bg-primary-600/20 border border-primary-600/30 hover:bg-primary-600/30 text-primary-400 rounded-lg text-sm transition-all">
+                        <i class="fa-solid fa-download"></i> Resume
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ============================================================
+     SKILLS
+     ============================================================ -->
+<section id="skills" class="py-24 bg-slate-900/50">
+    <div class="max-w-6xl mx-auto px-6">
+
+        {% include 'public/partials/section_header.html' with label="What I Know" title="Skills & Technologies"
+        subtitle="Technologies and tools I work with across software engineering, cloud infrastructure, and DevOps." %}
+
+        {% if skill_categories %}
+        <div class="space-y-12">
+            {% for category in skill_categories %}
+            {% if category.skills.all %}
+            <div class="aos">
+                <!-- Category label -->
+                <div class="flex items-center gap-3 mb-6">
+                    {% if category.icon %}
+                    <div class="w-8 h-8 bg-primary-600/20 rounded-lg flex items-center justify-center">
+                        <i class="{{ category.icon }} text-primary-400 text-sm"></i>
+                    </div>
+                    {% endif %}
+                    <h3 class="text-lg font-semibold text-white">{{ category.name }}</h3>
+                    <div class="flex-1 h-px bg-slate-800"></div>
+                </div>
+
+                <!-- Skills grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {% for skill in category.skills.all %}
+                    <div
+                        class="bg-slate-900 rounded-xl border border-slate-800 p-4 hover:border-primary-600/40 transition-all duration-300 group">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center gap-2.5">
+                                {% if skill.icon %}
+                                <i
+                                    class="{{ skill.icon }} text-lg text-slate-300 group-hover:text-primary-400 transition-colors"></i>
+                                {% endif %}
+                                <span class="font-medium text-white text-sm">{{ skill.name }}</span>
+                            </div>
+                            <span class="text-xs text-slate-500 mono">{{ skill.proficiency_percent }}%</span>
+                        </div>
+                        <!-- Progress bar -->
+                        <div class="w-full bg-slate-800 rounded-full h-1.5">
+                            <div class="h-1.5 rounded-full bg-gradient-to-r from-primary-600 to-primary-400 transition-all duration-1000"
+                                style="width: 0%" data-width="{{ skill.proficiency_percent }}%">
+                            </div>
+                        </div>
+                        <div class="mt-2">
+                            <span class="text-xs px-1.5 py-0.5 rounded
+                                {% if skill.proficiency == 'expert' %}text-purple-400 bg-purple-900/30
+                                {% elif skill.proficiency == 'advanced' %}text-blue-400 bg-blue-900/30
+                                {% elif skill.proficiency == 'intermediate' %}text-green-400 bg-green-900/30
+                                {% else %}text-slate-400 bg-slate-800{% endif %}">
+                                {{ skill.get_proficiency_display }}
+                            </span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-center text-slate-500">No skills added yet.</p>
+        {% endif %}
+    </div>
+</section>
+
+
+<!-- ============================================================
+     EXPERIENCE
+     ============================================================ -->
+{% if experiences %}
+<section id="experience" class="py-24 bg-slate-950">
+    <div class="max-w-4xl mx-auto px-6">
+
+        {% include 'public/partials/section_header.html' with label="My Journey" title="Work Experience" subtitle="" %}
+
+        <div class="relative">
+            <!-- Timeline line -->
+            <div class="absolute left-8 top-0 bottom-0 w-px bg-slate-800 hidden sm:block"></div>
+
+            <div class="space-y-8">
+                {% for exp in experiences %}
+                <div class="relative flex gap-6 aos">
+                    <!-- Timeline dot -->
+                    <div class="hidden sm:flex flex-shrink-0 w-16 items-start justify-center pt-1">
+                        <div
+                            class="w-4 h-4 rounded-full border-2 {% if exp.is_current %}border-primary-500 bg-primary-500{% else %}border-slate-600 bg-slate-900{% endif %} z-10">
+                        </div>
+                    </div>
+
+                    <!-- Card -->
+                    <div
+                        class="flex-1 bg-slate-900 rounded-xl border border-slate-800 p-6 hover:border-slate-700 transition-colors">
+                        <div class="flex items-start justify-between gap-4 flex-wrap">
+                            <div class="flex items-center gap-4">
+                                {% if exp.company_logo %}
+                                <img src="{{ exp.company_logo.url }}" alt="{{ exp.company }}"
+                                    class="w-12 h-12 rounded-lg object-cover border border-slate-700 flex-shrink-0">
+                                {% else %}
+                                <div
+                                    class="w-12 h-12 bg-slate-800 rounded-lg flex items-center justify-center flex-shrink-0">
+                                    <i class="fa-solid fa-briefcase text-slate-500"></i>
+                                </div>
+                                {% endif %}
+                                <div>
+                                    <h3 class="font-bold text-white">{{ exp.position }}</h3>
+                                    <p class="text-primary-400 text-sm font-medium">
+                                        {% if exp.company_url %}
+                                        <a href="{{ exp.company_url }}" target="_blank" rel="noopener"
+                                            class="hover:text-primary-300 transition-colors">
+                                            {{ exp.company }}
+                                        </a>
+                                        {% else %}
+                                        {{ exp.company }}
+                                        {% endif %}
+                                        {% if exp.location %}
+                                        <span class="text-slate-500 font-normal"> &middot; {{ exp.location }}</span>
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="text-right flex-shrink-0">
+                                <p class="text-sm text-slate-400 mono">
+                                    {{ exp.start_date|date:"M Y" }} &mdash;
+                                    {% if exp.is_current %}
+                                    <span class="text-green-400">Present</span>
+                                    {% else %}
+                                    {{ exp.end_date|date:"M Y" }}
+                                    {% endif %}
+                                </p>
+                                {% if exp.is_current %}
+                                <span
+                                    class="inline-block mt-1 px-2 py-0.5 bg-green-900/40 text-green-400 text-xs rounded-full border border-green-800/50">
+                                    Current
+                                </span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        {% if exp.description %}
+                        <p class="text-slate-400 text-sm leading-relaxed mt-4">
+                            {{ exp.description|truncatewords:40 }}
+                        </p>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+
+<!-- ============================================================
+     FEATURED PROJECTS
+     ============================================================ -->
+{% if featured_projects %}
+<section id="projects" class="py-24 bg-slate-900/50">
+    <div class="max-w-6xl mx-auto px-6">
+
+        {% include 'public/partials/section_header.html' with label="My Work" title="Featured Projects" subtitle="A
+        selection of projects that demonstrate my engineering and DevOps skills." %}
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+            {% for project in featured_projects %}
+            <div class="aos" style="animation-delay: {{ forloop.counter0 }}00ms">
+                {% include 'public/partials/project_card.html' %}
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="text-center aos">
+            <a href="{% url 'public:project-list' %}"
+                class="inline-flex items-center gap-2 px-6 py-3 border border-slate-700 hover:border-primary-500 text-slate-300 hover:text-white rounded-xl font-semibold transition-all duration-300 hover:-translate-y-0.5">
+                View All Projects
+                <i class="fa-solid fa-arrow-right text-sm"></i>
+            </a>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+
+<!-- ============================================================
+     CERTIFICATES
+     ============================================================ -->
+{% if featured_certificates %}
+<section id="certificates" class="py-24 bg-slate-950">
+    <div class="max-w-6xl mx-auto px-6">
+
+        {% include 'public/partials/section_header.html' with label="Credentials" title="Certifications"
+        subtitle="Professional certifications that validate my expertise." %}
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+            {% for cert in featured_certificates %}
+            <div class="group bg-slate-900 rounded-xl border border-slate-800 p-5 hover:border-primary-600/50 transition-all duration-300 hover:-translate-y-1 aos"
+                style="animation-delay: {{ forloop.counter0 }}00ms">
+                <div class="flex items-start gap-4">
+                    {% if cert.image %}
+                    <img src="{{ cert.image.url }}" alt="{{ cert.title }}"
+                        class="w-14 h-14 rounded-lg object-cover border border-slate-700 flex-shrink-0">
+                    {% else %}
+                    <div class="w-14 h-14 bg-slate-800 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <i class="fa-solid fa-certificate text-yellow-400 text-2xl"></i>
+                    </div>
+                    {% endif %}
+
+                    <div class="flex-1 min-w-0">
+                        <h3
+                            class="font-semibold text-white text-sm leading-snug mb-1 group-hover:text-primary-400 transition-colors">
+                            {{ cert.title }}
+                        </h3>
+                        <p class="text-slate-400 text-xs mb-2">{{ cert.issuing_organization }}</p>
+                        <p class="text-slate-500 text-xs mono">{{ cert.issue_date|date:"M Y" }}</p>
+
+                        {% if cert.credential_url %}
+                        <a href="{{ cert.credential_url }}" target="_blank" rel="noopener"
+                            class="inline-flex items-center gap-1 mt-2 text-xs text-primary-400 hover:text-primary-300 transition-colors">
+                            <i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
+                            Verify
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="text-center aos">
+            <a href="{% url 'public:certificate-list' %}"
+                class="inline-flex items-center gap-2 px-6 py-3 border border-slate-700 hover:border-primary-500 text-slate-300 hover:text-white rounded-xl font-semibold transition-all duration-300 hover:-translate-y-0.5">
+                View All Certificates
+                <i class="fa-solid fa-arrow-right text-sm"></i>
+            </a>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+
+<!-- ============================================================
+     FEATURED BLOG POSTS
+     ============================================================ -->
+{% if featured_posts %}
+<section id="blog" class="py-24 bg-slate-900/50">
+    <div class="max-w-6xl mx-auto px-6">
+
+        {% include 'public/partials/section_header.html' with label="Writing" title="Latest Articles" subtitle="Thoughts
+        on software engineering, cloud architecture, and DevOps practices." %}
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+            {% for post in featured_posts %}
+            <div class="aos" style="animation-delay: {{ forloop.counter0 }}00ms">
+                {% include 'public/partials/blog_card.html' %}
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="text-center aos">
+            <a href="{% url 'public:blog-list' %}"
+                class="inline-flex items-center gap-2 px-6 py-3 border border-slate-700 hover:border-primary-500 text-slate-300 hover:text-white rounded-xl font-semibold transition-all duration-300 hover:-translate-y-0.5">
+                Read All Articles
+                <i class="fa-solid fa-arrow-right text-sm"></i>
+            </a>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+
+<!-- ============================================================
+     CONTACT CTA
+     ============================================================ -->
+<section id="contact-cta" class="py-24 bg-slate-950">
+    <div class="max-w-3xl mx-auto px-6 text-center">
+        <div class="bg-slate-900 rounded-2xl border border-slate-800 p-12 relative overflow-hidden aos">
+
+            <!-- Background glow -->
+            <div class="absolute inset-0 bg-gradient-to-br from-primary-600/5 to-purple-600/5 pointer-events-none">
+            </div>
+
+            <div class="relative">
+                <div class="w-14 h-14 bg-primary-600/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                    <i class="fa-solid fa-paper-plane text-primary-400 text-xl"></i>
+                </div>
+
+                <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">
+                    Let's Work Together
+                </h2>
+                <p class="text-slate-400 mb-8 leading-relaxed">
+                    I'm open to full-time roles, freelance projects, and collaborations.
+                    If you have something in mind, I'd love to hear from you.
+                </p>
+
+                <div class="flex flex-wrap items-center justify-center gap-4">
+                    <a href="{% url 'public:contact' %}"
+                        class="px-6 py-3 bg-primary-600 hover:bg-primary-500 text-white font-semibold rounded-xl transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary-600/30">
+                        <i class="fa-solid fa-envelope mr-2"></i>Get in Touch
+                    </a>
+                    {% if site_profile.email %}
+                    <a href="mailto:{{ site_profile.email }}"
+                        class="px-6 py-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white font-semibold rounded-xl transition-all duration-300 hover:-translate-y-0.5">
+                        {{ site_profile.email }}
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+
+
+{% block extra_js %}
+<script>
+    // ── Progress bar animation ────────────────────────────────
+    // Animate skill progress bars when they scroll into view
+    const barObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.querySelectorAll('[data-width]').forEach(bar => {
+                    setTimeout(() => {
+                        bar.style.width = bar.dataset.width;
+                    }, 200);
+                });
+                barObserver.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.2 });
+
+    document.querySelectorAll('#skills .aos').forEach(el => {
+        barObserver.observe(el);
+    });
+
+    // ── Typed title effect ─────────────────────────────────────
+    // Cycles through title variations with a typewriter effect
+    const titles = [
+        '{{ site_profile.title|default:"Software Engineer" }}',
+        'Full Stack Developer',
+        'Cloud Engineer',
+        'DevOps Engineer',
+    ];
+
+    const titleEl = document.getElementById('typed-title');
+    if (titleEl) {
+        let titleIndex = 0;
+        let charIndex = 0;
+        let isDeleting = false;
+
+        function type() {
+            const current = titles[titleIndex];
+            if (isDeleting) {
+                titleEl.textContent = current.substring(0, charIndex - 1);
+                charIndex--;
+            } else {
+                titleEl.textContent = current.substring(0, charIndex + 1);
+                charIndex++;
+            }
+
+            let delay = isDeleting ? 50 : 100;
+
+            if (!isDeleting && charIndex === current.length) {
+                delay = 2000;
+                isDeleting = true;
+            } else if (isDeleting && charIndex === 0) {
+                isDeleting = false;
+                titleIndex = (titleIndex + 1) % titles.length;
+                delay = 400;
+            }
+
+            setTimeout(type, delay);
+        }
+
+        setTimeout(type, 1000);
+    }
+</script>
+{% endblock %}
