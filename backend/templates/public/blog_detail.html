@@ -1,0 +1,200 @@
+{% extends 'public/base.html' %}
+
+{% block meta_title %}{{ post.meta_title|default:post.title }}{% endblock %}
+{% block meta_description %}{{ post.meta_description|default:post.excerpt }}{% endblock %}
+{% block og_title %}{{ post.title }}{% endblock %}
+
+{% block content %}
+
+<!-- Article header -->
+<section class="py-20 bg-slate-950 border-b border-slate-800">
+    <div class="max-w-3xl mx-auto px-6">
+
+        <!-- Breadcrumb -->
+        <nav class="flex items-center gap-2 text-sm text-slate-500 mb-8">
+            <a href="{% url 'public:home' %}" class="hover:text-white transition-colors">Home</a>
+            <i class="fa-solid fa-chevron-right text-xs"></i>
+            <a href="{% url 'public:blog-list' %}" class="hover:text-white transition-colors">Blog</a>
+            <i class="fa-solid fa-chevron-right text-xs"></i>
+            <span class="text-slate-300 truncate max-w-48">{{ post.title }}</span>
+        </nav>
+
+        <!-- Meta -->
+        <div class="flex flex-wrap items-center gap-3 mb-6">
+            {% if post.category %}
+            <a href="{% url 'public:blog-list' %}?category={{ post.category.slug }}"
+               class="px-3 py-1 bg-primary-600/20 text-primary-400 text-sm font-medium rounded-lg border border-primary-600/30 hover:bg-primary-600/30 transition-colors">
+                {{ post.category.name }}
+            </a>
+            {% endif %}
+            <span class="text-slate-500 text-sm flex items-center gap-1.5">
+                <i class="fa-regular fa-clock"></i>
+                {{ post.reading_time }} min read
+            </span>
+            <span class="text-slate-500 text-sm flex items-center gap-1.5">
+                <i class="fa-regular fa-eye"></i>
+                {{ post.views }} view{{ post.views|pluralize }}
+            </span>
+        </div>
+
+        <h1 class="text-3xl md:text-5xl font-extrabold text-white mb-6 leading-tight">
+            {{ post.title }}
+        </h1>
+
+        {% if post.excerpt %}
+        <p class="text-xl text-slate-400 leading-relaxed mb-8">{{ post.excerpt }}</p>
+        {% endif %}
+
+        <!-- Author & date -->
+        <div class="flex items-center gap-4 pt-6 border-t border-slate-800">
+            <div class="w-10 h-10 bg-primary-600 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                {% if site_profile.profile_picture %}
+                <img src="{{ site_profile.profile_picture.url }}"
+                     alt="{{ site_profile.full_name }}"
+                     class="w-full h-full object-cover rounded-full">
+                {% else %}
+                {{ site_profile.full_name|first|upper|default:"A" }}
+                {% endif %}
+            </div>
+            <div>
+                <p class="text-white font-medium text-sm">
+                    {% if post.author %}
+                    {{ post.author.get_full_name|default:post.author.username }}
+                    {% endif %}
+                </p>
+                <p class="text-slate-500 text-xs mono">
+                    {{ post.published_at|date:"F j, Y" }}
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Article body -->
+<article class="py-16 bg-slate-950">
+    <div class="max-w-3xl mx-auto px-6">
+
+        <!-- Cover image -->
+        {% if post.cover_image %}
+        <div class="rounded-2xl overflow-hidden border border-slate-800 mb-12">
+            <img src="{{ post.cover_image.url }}" alt="{{ post.title }}"
+                 class="w-full object-cover max-h-96">
+        </div>
+        {% endif %}
+
+        <!-- Content -->
+        <div class="blog-content text-slate-300 leading-relaxed">
+            {{ post.content|linebreaksbr }}
+        </div>
+
+        <!-- Tags -->
+        {% if post.tags.all %}
+        <div class="flex flex-wrap gap-2 mt-12 pt-8 border-t border-slate-800">
+            <span class="text-slate-500 text-sm mr-2 flex items-center">
+                <i class="fa-solid fa-tag mr-1.5"></i>Tags:
+            </span>
+            {% for tag in post.tags.all %}
+            <a href="{% url 'public:blog-list' %}?tag={{ tag.slug }}"
+               class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-400 hover:text-white text-xs rounded-lg transition-colors">
+                #{{ tag.name }}
+            </a>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Share & nav -->
+        <div class="flex items-center justify-between mt-10 pt-8 border-t border-slate-800">
+            <a href="{% url 'public:blog-list' %}"
+               class="flex items-center gap-2 text-slate-400 hover:text-white transition-colors text-sm">
+                <i class="fa-solid fa-arrow-left"></i> All Articles
+            </a>
+            <div class="flex items-center gap-3">
+                <span class="text-slate-500 text-sm">Share:</span>
+                <a href="https://twitter.com/intent/tweet?text={{ post.title|urlencode }}&url={{ request.build_absolute_uri }}"
+                   target="_blank" rel="noopener"
+                   class="w-8 h-8 bg-slate-800 hover:bg-slate-700 rounded-lg flex items-center justify-center text-slate-400 hover:text-white transition-colors">
+                    <i class="fa-brands fa-twitter text-sm"></i>
+                </a>
+                <a href="https://www.linkedin.com/shareArticle?mini=true&url={{ request.build_absolute_uri }}&title={{ post.title|urlencode }}"
+                   target="_blank" rel="noopener"
+                   class="w-8 h-8 bg-slate-800 hover:bg-slate-700 rounded-lg flex items-center justify-center text-slate-400 hover:text-white transition-colors">
+                    <i class="fa-brands fa-linkedin-in text-sm"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</article>
+
+<!-- Related posts -->
+{% if related_posts %}
+<section class="py-16 bg-slate-900/50 border-t border-slate-800">
+    <div class="max-w-6xl mx-auto px-6">
+        <h2 class="text-2xl font-bold text-white mb-8">Related Articles</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {% for post in related_posts %}
+            {% include 'public/partials/blog_card.html' %}
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* Blog content typography */
+    .blog-content p     { margin-bottom: 1.5rem; }
+    .blog-content h2    { font-size: 1.5rem; font-weight: 700; color: #f1f5f9; margin: 2.5rem 0 1rem; }
+    .blog-content h3    { font-size: 1.25rem; font-weight: 600; color: #f1f5f9; margin: 2rem 0 0.75rem; }
+    .blog-content ul    { list-style: disc; padding-left: 1.5rem; margin-bottom: 1.5rem; space-y: 0.5rem; }
+    .blog-content ol    { list-style: decimal; padding-left: 1.5rem; margin-bottom: 1.5rem; }
+    .blog-content li    { margin-bottom: 0.5rem; }
+    .blog-content a     { color: #60a5fa; text-decoration: underline; }
+    .blog-content a:hover { color: #93c5fd; }
+    .blog-content strong { color: #f1f5f9; font-weight: 600; }
+    .blog-content code  {
+        font-family: 'JetBrains Mono', monospace;
+        background: #1e293b;
+        border: 1px solid #334155;
+        padding: 0.15rem 0.4rem;
+        border-radius: 0.25rem;
+        font-size: 0.875rem;
+        color: #7dd3fc;
+    }
+    .blog-content pre {
+        background: #0f172a;
+        border: 1px solid #1e293b;
+        border-radius: 0.75rem;
+        padding: 1.25rem 1.5rem;
+        overflow-x: auto;
+        margin-bottom: 1.5rem;
+    }
+    .blog-content pre code {
+        background: none;
+        border: none;
+        padding: 0;
+        color: #e2e8f0;
+        font-size: 0.875rem;
+    }
+    .blog-content blockquote {
+        border-left: 3px solid #3b82f6;
+        padding: 0.75rem 1.25rem;
+        background: #1e293b;
+        border-radius: 0 0.5rem 0.5rem 0;
+        color: #94a3b8;
+        margin-bottom: 1.5rem;
+        font-style: italic;
+    }
+    .blog-content hr {
+        border-color: #1e293b;
+        margin: 2rem 0;
+    }
+    .blog-content img {
+        border-radius: 0.75rem;
+        margin: 1.5rem 0;
+        border: 1px solid #1e293b;
+        max-width: 100%;
+    }
+</style>
+{% endblock %}

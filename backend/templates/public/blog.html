@@ -1,0 +1,123 @@
+{% extends 'public/base.html' %}
+
+{% block meta_title %}Blog{% endblock %}
+{% block meta_description %}Articles on software engineering, cloud infrastructure, and DevOps.{% endblock %}
+
+{% block content %}
+
+<!-- Page header -->
+<section class="py-20 bg-slate-950 border-b border-slate-800">
+    <div class="max-w-6xl mx-auto px-6 text-center">
+        <p class="text-primary-400 text-sm font-semibold uppercase tracking-widest mb-3 mono">Writing</p>
+        <h1 class="text-4xl md:text-5xl font-extrabold text-white mb-4">Blog</h1>
+        <p class="text-slate-400 max-w-2xl mx-auto">
+            Thoughts and guides on software engineering,
+            cloud architecture, and DevOps practices.
+        </p>
+    </div>
+</section>
+
+<section class="py-16 bg-slate-950">
+    <div class="max-w-6xl mx-auto px-6">
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-10">
+
+            <!-- Posts grid -->
+            <div class="lg:col-span-3">
+
+                {% if posts %}
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {% for post in posts %}
+                    <div class="aos" style="animation-delay: {{ forloop.counter0 }}00ms">
+                        {% include 'public/partials/blog_card.html' %}
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Pagination -->
+                {% if is_paginated %}
+                <div class="flex justify-center items-center gap-2 mt-12">
+                    {% if page_obj.has_previous %}
+                    <a href="?{% if current_category %}category={{ current_category }}&{% endif %}{% if current_tag %}tag={{ current_tag }}&{% endif %}page={{ page_obj.previous_page_number }}"
+                       class="px-4 py-2 bg-slate-900 border border-slate-700 rounded-lg text-slate-300 hover:bg-slate-800 transition-colors">
+                        <i class="fa-solid fa-chevron-left mr-1"></i> Previous
+                    </a>
+                    {% endif %}
+                    <span class="px-4 py-2 text-slate-400 text-sm">
+                        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                    </span>
+                    {% if page_obj.has_next %}
+                    <a href="?{% if current_category %}category={{ current_category }}&{% endif %}{% if current_tag %}tag={{ current_tag }}&{% endif %}page={{ page_obj.next_page_number }}"
+                       class="px-4 py-2 bg-slate-900 border border-slate-700 rounded-lg text-slate-300 hover:bg-slate-800 transition-colors">
+                        Next <i class="fa-solid fa-chevron-right ml-1"></i>
+                    </a>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                {% else %}
+                <div class="text-center py-24">
+                    <i class="fa-solid fa-pen-nib text-slate-700 text-6xl mb-4 block"></i>
+                    <p class="text-slate-400 text-lg mb-2">No posts found.</p>
+                    {% if current_category or current_tag %}
+                    <a href="{% url 'public:blog-list' %}" class="text-primary-400 hover:underline text-sm">
+                        Clear filters
+                    </a>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Sidebar -->
+            <aside class="space-y-8">
+
+                <!-- Categories -->
+                {% if categories %}
+                <div class="bg-slate-900 rounded-xl border border-slate-800 p-6">
+                    <h3 class="font-semibold text-white mb-4 text-sm uppercase tracking-wider">Categories</h3>
+                    <ul class="space-y-2">
+                        <li>
+                            <a href="{% url 'public:blog-list' %}"
+                               class="flex items-center justify-between text-sm transition-colors
+                                      {% if not current_category %}text-primary-400 font-medium{% else %}text-slate-400 hover:text-white{% endif %}">
+                                <span>All Posts</span>
+                            </a>
+                        </li>
+                        {% for cat in categories %}
+                        <li>
+                            <a href="?category={{ cat.slug }}"
+                               class="flex items-center justify-between text-sm transition-colors
+                                      {% if current_category == cat.slug %}text-primary-400 font-medium{% else %}text-slate-400 hover:text-white{% endif %}">
+                                <span>{{ cat.name }}</span>
+                                <span class="text-xs text-slate-600 bg-slate-800 px-1.5 py-0.5 rounded">
+                                    {{ cat.posts.count }}
+                                </span>
+                            </a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                <!-- Tags -->
+                {% if tags %}
+                <div class="bg-slate-900 rounded-xl border border-slate-800 p-6">
+                    <h3 class="font-semibold text-white mb-4 text-sm uppercase tracking-wider">Tags</h3>
+                    <div class="flex flex-wrap gap-2">
+                        {% for tag in tags %}
+                        <a href="?tag={{ tag.slug }}"
+                           class="px-2.5 py-1 text-xs rounded-lg border transition-colors
+                                  {% if current_tag == tag.slug %}bg-primary-600/20 border-primary-600/50 text-primary-400
+                                  {% else %}bg-slate-800 border-slate-700 text-slate-400 hover:border-slate-600 hover:text-white{% endif %}">
+                            #{{ tag.name }}
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+            </aside>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

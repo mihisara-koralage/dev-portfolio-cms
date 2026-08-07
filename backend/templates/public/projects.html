@@ -1,0 +1,95 @@
+{% extends 'public/base.html' %}
+{% load public_tags %}
+
+{% block meta_title %}Projects{% endblock %}
+{% block meta_description %}A showcase of my software engineering and DevOps projects.{% endblock %}
+
+{% block content %}
+
+<!-- Page header -->
+<section class="py-20 bg-slate-950 border-b border-slate-800">
+    <div class="max-w-6xl mx-auto px-6 text-center">
+        <p class="text-primary-400 text-sm font-semibold uppercase tracking-widest mb-3 mono">My Work</p>
+        <h1 class="text-4xl md:text-5xl font-extrabold text-white mb-4">Projects</h1>
+        <p class="text-slate-400 max-w-2xl mx-auto">
+            A collection of projects spanning full-stack development,
+            cloud infrastructure, and DevOps engineering.
+        </p>
+    </div>
+</section>
+
+<!-- Filter bar -->
+<section class="bg-slate-950 border-b border-slate-800 sticky top-16 z-40">
+    <div class="max-w-6xl mx-auto px-6 py-4 flex items-center gap-3 overflow-x-auto">
+        <a href="{% url 'public:project-list' %}"
+           class="flex-shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-colors
+                  {% if not current_status %}bg-primary-600 text-white{% else %}bg-slate-900 text-slate-400 border border-slate-700 hover:bg-slate-800 hover:text-white{% endif %}">
+            All
+        </a>
+        {% for value, label in status_choices %}
+        <a href="?status={{ value }}"
+           class="flex-shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-colors
+                  {% if current_status == value %}bg-primary-600 text-white{% else %}bg-slate-900 text-slate-400 border border-slate-700 hover:bg-slate-800 hover:text-white{% endif %}">
+            {{ label }}
+        </a>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- Projects grid -->
+<section class="py-16 bg-slate-950">
+    <div class="max-w-6xl mx-auto px-6">
+        {% if projects %}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for project in projects %}
+            <div class="aos" style="animation-delay: {{ forloop.counter0 }}00ms">
+                {% include 'public/partials/project_card.html' %}
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if is_paginated %}
+        <div class="flex justify-center items-center gap-2 mt-12">
+            {% if page_obj.has_previous %}
+            <a href="?{% if current_status %}status={{ current_status }}&{% endif %}page={{ page_obj.previous_page_number }}"
+               class="px-4 py-2 bg-slate-900 border border-slate-700 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition-colors">
+                <i class="fa-solid fa-chevron-left mr-1"></i> Previous
+            </a>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                <span class="px-4 py-2 bg-primary-600 text-white rounded-lg text-sm font-semibold">{{ num }}</span>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                <a href="?{% if current_status %}status={{ current_status }}&{% endif %}page={{ num }}"
+                   class="px-4 py-2 bg-slate-900 border border-slate-700 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white transition-colors text-sm">
+                    {{ num }}
+                </a>
+                {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+            <a href="?{% if current_status %}status={{ current_status }}&{% endif %}page={{ page_obj.next_page_number }}"
+               class="px-4 py-2 bg-slate-900 border border-slate-700 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition-colors">
+                Next <i class="fa-solid fa-chevron-right ml-1"></i>
+            </a>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        {% else %}
+        <div class="text-center py-24">
+            <i class="fa-solid fa-folder-open text-slate-700 text-6xl mb-4 block"></i>
+            <p class="text-slate-400 text-lg mb-2">No projects found.</p>
+            {% if current_status %}
+            <a href="{% url 'public:project-list' %}" class="text-primary-400 hover:underline text-sm">
+                Clear filter
+            </a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+{% endblock %}

@@ -1,0 +1,238 @@
+{% extends 'public/base.html' %}
+{% load public_tags %}
+
+{% block meta_title %}{{ project.title }}{% endblock %}
+{% block meta_description %}{{ project.short_description }}{% endblock %}
+
+{% block content %}
+
+<!-- Hero -->
+<section class="py-20 bg-slate-950 border-b border-slate-800">
+    <div class="max-w-4xl mx-auto px-6">
+
+        <!-- Breadcrumb -->
+        <nav class="flex items-center gap-2 text-sm text-slate-500 mb-8">
+            <a href="{% url 'public:home' %}" class="hover:text-white transition-colors">Home</a>
+            <i class="fa-solid fa-chevron-right text-xs"></i>
+            <a href="{% url 'public:project-list' %}" class="hover:text-white transition-colors">Projects</a>
+            <i class="fa-solid fa-chevron-right text-xs"></i>
+            <span class="text-slate-300">{{ project.title }}</span>
+        </nav>
+
+        <div class="flex flex-wrap items-center gap-3 mb-4">
+            <!-- Status -->
+            <span class="px-3 py-1 text-sm font-medium rounded-full
+                {% if project.status == 'completed' %}bg-green-900/50 text-green-300 border border-green-800/50
+                {% elif project.status == 'in_progress' %}bg-blue-900/50 text-blue-300 border border-blue-800/50
+                {% else %}bg-slate-800 text-slate-400 border border-slate-700{% endif %}">
+                {{ project.get_status_display }}
+            </span>
+            {% if project.is_featured %}
+            <span class="px-3 py-1 text-sm font-medium rounded-full bg-yellow-900/50 text-yellow-300 border border-yellow-800/50">
+                <i class="fa-solid fa-star mr-1"></i>Featured
+            </span>
+            {% endif %}
+        </div>
+
+        <h1 class="text-4xl md:text-5xl font-extrabold text-white mb-4">{{ project.title }}</h1>
+        <p class="text-xl text-slate-400 mb-8">{{ project.short_description }}</p>
+
+        <!-- Links -->
+        <div class="flex flex-wrap gap-4">
+            {% if project.github_url %}
+            <a href="{{ project.github_url }}" target="_blank" rel="noopener"
+               class="flex items-center gap-2 px-5 py-2.5 bg-slate-900 hover:bg-slate-800 border border-slate-700 hover:border-slate-600 text-white rounded-xl font-semibold transition-all">
+                <i class="fa-brands fa-github"></i> View on GitHub
+            </a>
+            {% endif %}
+            {% if project.live_url %}
+            <a href="{{ project.live_url }}" target="_blank" rel="noopener"
+               class="flex items-center gap-2 px-5 py-2.5 bg-primary-600 hover:bg-primary-500 text-white rounded-xl font-semibold transition-all">
+                <i class="fa-solid fa-arrow-up-right-from-square"></i> Live Demo
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<!-- Main content -->
+<section class="py-16 bg-slate-950">
+    <div class="max-w-4xl mx-auto px-6">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
+
+            <!-- Left: description + images -->
+            <div class="lg:col-span-2 space-y-10">
+
+                <!-- Thumbnail -->
+                {% if project.thumbnail %}
+                <div class="rounded-2xl overflow-hidden border border-slate-800">
+                    <img src="{{ project.thumbnail.url }}" alt="{{ project.title }}"
+                         class="w-full object-cover">
+                </div>
+                {% endif %}
+
+                <!-- Description -->
+                <div>
+                    <h2 class="text-2xl font-bold text-white mb-4">About This Project</h2>
+                    <div class="prose prose-invert max-w-none text-slate-400 leading-relaxed space-y-4">
+                        {{ project.description|linebreaksbr }}
+                    </div>
+                </div>
+
+                <!-- Screenshots -->
+                {% if project.images.all %}
+                <div>
+                    <h2 class="text-2xl font-bold text-white mb-6">Screenshots</h2>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {% for image in project.images.all %}
+                        <div class="rounded-xl overflow-hidden border border-slate-800 group cursor-pointer"
+                             onclick="openLightbox('{{ image.image.url }}', '{{ image.caption }}')">
+                            <img src="{{ image.image.url }}"
+                                 alt="{{ image.caption|default:project.title }}"
+                                 class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-500">
+                            {% if image.caption %}
+                            <p class="px-3 py-2 text-xs text-slate-500 bg-slate-900">{{ image.caption }}</p>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Dates -->
+                {% if project.started_at or project.completed_at %}
+                <div class="flex flex-wrap gap-6 pt-6 border-t border-slate-800">
+                    {% if project.started_at %}
+                    <div>
+                        <p class="text-xs text-slate-500 uppercase tracking-wider mb-1">Started</p>
+                        <p class="text-white font-medium mono">{{ project.started_at|date:"M Y" }}</p>
+                    </div>
+                    {% endif %}
+                    {% if project.completed_at %}
+                    <div>
+                        <p class="text-xs text-slate-500 uppercase tracking-wider mb-1">Completed</p>
+                        <p class="text-white font-medium mono">{{ project.completed_at|date:"M Y" }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Right: sidebar -->
+            <div class="space-y-8">
+
+                <!-- Tech stack -->
+                {% if project.skills.all %}
+                <div class="bg-slate-900 rounded-xl border border-slate-800 p-6">
+                    <h3 class="font-semibold text-white mb-4 text-sm uppercase tracking-wider">
+                        Tech Stack
+                    </h3>
+                    <div class="flex flex-wrap gap-2">
+                        {% for skill in project.skills.all %}
+                        <span class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 text-sm rounded-lg transition-colors flex items-center gap-1.5">
+                            {% if skill.icon %}
+                            <i class="{{ skill.icon }} text-xs"></i>
+                            {% endif %}
+                            {{ skill.name }}
+                        </span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Links sidebar card -->
+                {% if project.github_url or project.live_url %}
+                <div class="bg-slate-900 rounded-xl border border-slate-800 p-6">
+                    <h3 class="font-semibold text-white mb-4 text-sm uppercase tracking-wider">Links</h3>
+                    <div class="space-y-3">
+                        {% if project.github_url %}
+                        <a href="{{ project.github_url }}" target="_blank" rel="noopener"
+                           class="flex items-center gap-3 text-slate-300 hover:text-white transition-colors group">
+                            <div class="w-8 h-8 bg-slate-800 group-hover:bg-slate-700 rounded-lg flex items-center justify-center transition-colors">
+                                <i class="fa-brands fa-github text-sm"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium">GitHub Repository</p>
+                                <p class="text-xs text-slate-500 truncate max-w-40">{{ project.github_url }}</p>
+                            </div>
+                        </a>
+                        {% endif %}
+                        {% if project.live_url %}
+                        <a href="{{ project.live_url }}" target="_blank" rel="noopener"
+                           class="flex items-center gap-3 text-slate-300 hover:text-white transition-colors group">
+                            <div class="w-8 h-8 bg-slate-800 group-hover:bg-primary-600/30 rounded-lg flex items-center justify-center transition-colors">
+                                <i class="fa-solid fa-globe text-sm text-primary-400"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium">Live Demo</p>
+                                <p class="text-xs text-slate-500 truncate max-w-40">{{ project.live_url }}</p>
+                            </div>
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Back button -->
+                <a href="{% url 'public:project-list' %}"
+                   class="flex items-center gap-2 text-slate-400 hover:text-white transition-colors text-sm">
+                    <i class="fa-solid fa-arrow-left"></i> All Projects
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Related projects -->
+{% if related_projects %}
+<section class="py-16 bg-slate-900/50 border-t border-slate-800">
+    <div class="max-w-6xl mx-auto px-6">
+        <h2 class="text-2xl font-bold text-white mb-8">Related Projects</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {% for project in related_projects %}
+            {% include 'public/partials/project_card.html' %}
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Lightbox -->
+<div id="lightbox"
+     class="fixed inset-0 bg-black/90 z-50 hidden items-center justify-center p-4"
+     onclick="closeLightbox()">
+    <div class="relative max-w-5xl max-h-full">
+        <img id="lightbox-img" src="" alt="" class="max-w-full max-h-screen object-contain rounded-xl">
+        <p id="lightbox-caption" class="text-center text-slate-400 text-sm mt-3"></p>
+        <button onclick="closeLightbox()"
+                class="absolute -top-4 -right-4 w-8 h-8 bg-slate-800 hover:bg-slate-700 rounded-full flex items-center justify-center text-white transition-colors">
+            <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function openLightbox(url, caption) {
+        const lb = document.getElementById('lightbox');
+        document.getElementById('lightbox-img').src = url;
+        document.getElementById('lightbox-caption').textContent = caption || '';
+        lb.classList.remove('hidden');
+        lb.classList.add('flex');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeLightbox() {
+        const lb = document.getElementById('lightbox');
+        lb.classList.add('hidden');
+        lb.classList.remove('flex');
+        document.body.style.overflow = '';
+    }
+
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') closeLightbox();
+    });
+</script>
+{% endblock %}

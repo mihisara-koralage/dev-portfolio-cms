@@ -1,0 +1,114 @@
+{% extends 'public/base.html' %}
+
+{% block meta_title %}Certificates{% endblock %}
+{% block meta_description %}Professional certifications and course completions.{% endblock %}
+
+{% block content %}
+
+<!-- Page header -->
+<section class="py-20 bg-slate-950 border-b border-slate-800">
+    <div class="max-w-6xl mx-auto px-6 text-center">
+        <p class="text-primary-400 text-sm font-semibold uppercase tracking-widest mb-3 mono">Credentials</p>
+        <h1 class="text-4xl md:text-5xl font-extrabold text-white mb-4">Certifications</h1>
+        <p class="text-slate-400 max-w-2xl mx-auto">
+            Professional certifications and course completions that
+            validate my expertise across software engineering and cloud technologies.
+        </p>
+    </div>
+</section>
+
+<!-- Certificates -->
+<section class="py-16 bg-slate-950">
+    <div class="max-w-6xl mx-auto px-6">
+
+        {% if certificates %}
+
+        <!-- Group by organization -->
+        {% regroup certificates by issuing_organization as org_list %}
+
+        {% for org in org_list %}
+        <div class="mb-14 aos">
+
+            <!-- Organization header -->
+            <div class="flex items-center gap-3 mb-6">
+                <div class="w-8 h-8 bg-primary-600/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <i class="fa-solid fa-building text-primary-400 text-sm"></i>
+                </div>
+                <h2 class="text-xl font-bold text-white">{{ org.grouper }}</h2>
+                <div class="flex-1 h-px bg-slate-800"></div>
+                <span class="text-xs text-slate-500 bg-slate-900 border border-slate-800 px-2 py-1 rounded-full">
+                    {{ org.list|length }} cert{{ org.list|length|pluralize }}
+                </span>
+            </div>
+
+            <!-- Cert cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                {% for cert in org.list %}
+                <div class="group bg-slate-900 rounded-xl border border-slate-800 p-5 hover:border-primary-600/50 transition-all duration-300 hover:-translate-y-1">
+                    <div class="flex items-start gap-4">
+
+                        <!-- Badge -->
+                        {% if cert.image %}
+                        <img src="{{ cert.image.url }}" alt="{{ cert.title }}"
+                             class="w-16 h-16 rounded-xl object-cover border border-slate-700 flex-shrink-0">
+                        {% else %}
+                        <div class="w-16 h-16 bg-slate-800 rounded-xl flex items-center justify-center flex-shrink-0 border border-slate-700">
+                            <i class="fa-solid fa-certificate text-yellow-400 text-2xl"></i>
+                        </div>
+                        {% endif %}
+
+                        <!-- Info -->
+                        <div class="flex-1 min-w-0">
+                            <h3 class="font-semibold text-white text-sm leading-snug mb-1 group-hover:text-primary-400 transition-colors">
+                                {{ cert.title }}
+                            </h3>
+                            <p class="text-slate-400 text-xs mb-3 mono">
+                                {{ cert.issue_date|date:"M Y" }}
+                                {% if cert.expiry_date %}
+                                &rarr; {{ cert.expiry_date|date:"M Y" }}
+                                {% else %}
+                                &middot; No Expiry
+                                {% endif %}
+                            </p>
+
+                            {% if cert.credential_id %}
+                            <p class="text-slate-500 text-xs mb-2 truncate" title="{{ cert.credential_id }}">
+                                <i class="fa-solid fa-fingerprint mr-1"></i>{{ cert.credential_id }}
+                            </p>
+                            {% endif %}
+
+                            {% if cert.credential_url %}
+                            <a href="{{ cert.credential_url }}" target="_blank" rel="noopener"
+                               class="inline-flex items-center gap-1.5 text-xs text-primary-400 hover:text-primary-300 font-medium transition-colors">
+                                <i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
+                                Verify Credential
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    {% if cert.is_featured %}
+                    <div class="mt-3 pt-3 border-t border-slate-800">
+                        <span class="text-xs text-yellow-400 flex items-center gap-1">
+                            <i class="fa-solid fa-star text-xs"></i>
+                            Featured
+                        </span>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+
+        {% else %}
+        <div class="text-center py-24">
+            <i class="fa-solid fa-certificate text-slate-700 text-6xl mb-4 block"></i>
+            <p class="text-slate-400 text-lg">No certificates added yet.</p>
+        </div>
+        {% endif %}
+
+    </div>
+</section>
+
+{% endblock %}
