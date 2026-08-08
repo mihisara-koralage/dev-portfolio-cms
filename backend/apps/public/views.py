@@ -5,18 +5,12 @@ These views render HTML templates directly using querysets.
 They do NOT call the REST API — both the API and these views
 are separate consumers of the same underlying models.
 
-Context processor (added below) injects profile into every
-template automatically so the navbar always has the right data.
+The context processor in context_processors.py injects
+site_profile into every template automatically.
 """
-import json
-from django.views.generic import (
-    TemplateView, ListView, DetailView, View
-)
-from django.http import FileResponse, Http404, JsonResponse
-from django.shortcuts import render, redirect
-from django.contrib import messages
-from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import csrf_exempt
+from django.views.generic import TemplateView, ListView, DetailView, View
+from django.http import FileResponse
+from django.shortcuts import render
 
 from apps.accounts.models import UserProfile
 from apps.portfolio.models import (
@@ -131,7 +125,6 @@ class BlogDetailView(DetailView):
 
     def get_object(self, queryset=None):
         obj = super().get_object(queryset)
-        # Increment view count without triggering updated_at
         BlogPost.objects.filter(pk=obj.pk).update(views=obj.views + 1)
         return obj
 
@@ -153,28 +146,28 @@ class CertificateListView(ListView):
 
 
 class ResumeDownloadView(View):
-    """
-    Serves the latest uploaded resume PDF as a download.
-    Always fetches from the database so visitors always
-    get the current version without any caching issues.
-    """
     def get(self, request):
         profile = UserProfile.objects.first()
         if not profile or not profile.resume:
-            raise Http404("Resume not available.")
+            return render(request, 'public/resume_unavailable.html', status=404)
         return FileResponse(
             profile.resume.open('rb'),
             as_attachment=True,
-            filename='resume.pdf'
+            filename=f"{profile.full_name.replace(' ', '_')}_Resume.pdf"
         )
 
 
 class ContactView(TemplateView):
-    """
-    Contact page renders the form via template.
-    Form submission is handled by the REST API endpoint
-    (/api/contact/) via JavaScript fetch — this keeps the
-    form submission logic in one place (the API) and gives
-    us a clean JSON response without a full page reload.
-    """
     template_name = 'public/contact.html'
+
+
+# ----------------------------------------------------------------
+# Error handlers
+# ----------------------------------------------------------------
+
+def handler404(request, exception):
+    return render(request, '404.html', status=404)
+
+
+def handler500(request):
+    return render(request, '500.html', status=500)

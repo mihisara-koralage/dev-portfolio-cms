@@ -1,3 +1,4 @@
+{% load public_tags %}
 <!DOCTYPE html>
 <html lang="en" id="html-root">
 <head>
@@ -7,12 +8,24 @@
     <!-- SEO -->
     <title>{% block meta_title %}{{ site_profile.full_name|default:"Developer Portfolio" }}{% endblock %} | {% block meta_site_name %}Portfolio{% endblock %}</title>
     <meta name="description" content="{% block meta_description %}{{ site_profile.meta_description|default:"A developer portfolio." }}{% endblock %}">
-    <meta name="author" content="{{ site_profile.full_name|default:'' }}">
+    <meta name="author"      content="{{ site_profile.full_name|default:'' }}">
+    <meta name="robots"      content="index, follow">
+    <link rel="canonical"    href="{{ request.build_absolute_uri }}">
 
     <!-- Open Graph -->
-    <meta property="og:title" content="{% block og_title %}{{ site_profile.full_name|default:"Portfolio" }}{% endblock %}">
-    <meta property="og:description" content="{{ site_profile.meta_description|default:'' }}">
-    <meta property="og:type" content="website">
+    <meta property="og:type"        content="{% block og_type %}website{% endblock %}">
+    <meta property="og:url"         content="{{ request.build_absolute_uri }}">
+    <meta property="og:title"       content="{% block og_title %}{{ site_profile.full_name|default:'Portfolio' }}{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}{{ site_profile.meta_description|default:'' }}{% endblock %}">
+    <meta property="og:image"       content="{% block og_image %}{% if site_profile.profile_picture %}{{ request.scheme }}://{{ request.get_host }}{{ site_profile.profile_picture.url }}{% endif %}{% endblock %}">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card"        content="summary_large_image">
+    <meta name="twitter:title"       content="{% block twitter_title %}{{ site_profile.full_name|default:'Portfolio' }}{% endblock %}">
+    <meta name="twitter:description" content="{% block twitter_description %}{{ site_profile.meta_description|default:'' }}{% endblock %}">
+    {% if site_profile.twitter_url %}
+    <meta name="twitter:site" content="@{{ site_profile.twitter_url|cut:'https://twitter.com/'|cut:'https://x.com/' }}">
+    {% endif %}
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -96,6 +109,12 @@
 
 <body class="bg-slate-950 text-slate-100 antialiased transition-colors duration-300">
 
+<!-- Page load indicator -->
+<div id="page-loader"
+     class="fixed top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-600 to-purple-600 z-[9999] transition-all duration-300"
+     style="width: 0%">
+</div>
+
 <!-- ── Navigation ── -->
 <nav class="fixed top-0 left-0 right-0 z-50 bg-slate-950/80 backdrop-blur-md border-b border-slate-800/50 transition-all duration-300" id="navbar">
     <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
@@ -112,11 +131,11 @@
 
         <!-- Desktop nav -->
         <div class="hidden md:flex items-center gap-8">
-            <a href="{% url 'public:home' %}#about"        class="nav-link text-sm text-slate-400 hover:text-white transition-colors">About</a>
-            <a href="{% url 'public:home' %}#skills"       class="nav-link text-sm text-slate-400 hover:text-white transition-colors">Skills</a>
-            <a href="{% url 'public:project-list' %}"      class="nav-link text-sm text-slate-400 hover:text-white transition-colors">Projects</a>
-            <a href="{% url 'public:certificate-list' %}"  class="nav-link text-sm text-slate-400 hover:text-white transition-colors">Certificates</a>
-            <a href="{% url 'public:blog-list' %}"         class="nav-link text-sm text-slate-400 hover:text-white transition-colors">Blog</a>
+            <a href="{% url 'public:home' %}#about"        class="nav-link text-sm transition-colors {% active_link 'public:home' 'text-white' 'text-slate-400 hover:text-white' %}">About</a>
+            <a href="{% url 'public:home' %}#skills"       class="nav-link text-sm transition-colors {% active_link 'public:home' 'text-white' 'text-slate-400 hover:text-white' %}">Skills</a>
+            <a href="{% url 'public:project-list' %}"      class="nav-link text-sm transition-colors {% active_link 'public:project-list' 'text-white' 'text-slate-400 hover:text-white' %}">Projects</a>
+            <a href="{% url 'public:certificate-list' %}"  class="nav-link text-sm transition-colors {% active_link 'public:certificate-list' 'text-white' 'text-slate-400 hover:text-white' %}">Certificates</a>
+            <a href="{% url 'public:blog-list' %}"         class="nav-link text-sm transition-colors {% active_link 'public:blog-list' 'text-white' 'text-slate-400 hover:text-white' %}">Blog</a>
             <a href="{% url 'public:contact' %}"
                class="px-4 py-2 bg-primary-600 hover:bg-primary-500 text-white text-sm font-semibold rounded-lg transition-colors">
                 Contact
@@ -243,6 +262,32 @@
             ? 'fa-solid fa-bars text-xl'
             : 'fa-solid fa-xmark text-xl';
     });
+
+
+    // Page load progress bar
+    const loader = document.getElementById('page-loader');
+
+    window.addEventListener('load', () => {
+        loader.style.width = '100%';
+        setTimeout(() => { loader.style.opacity = '0'; }, 300);
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+        loader.style.width = '70%';
+    });
+
+    // Intercept link clicks to show loader
+    document.querySelectorAll('a[href]').forEach(link => {
+        if (link.hostname === window.location.hostname &&
+            !link.href.includes('#') &&
+            !link.target) {
+            link.addEventListener('click', () => {
+                loader.style.opacity = '1';
+                loader.style.width = '40%';
+            });
+        }
+    });
+
 
     // Navbar scroll effect
     const navbar = document.getElementById('navbar');

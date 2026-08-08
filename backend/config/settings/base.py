@@ -4,6 +4,12 @@ Base settings shared across all environments.
 from pathlib import Path
 from decouple import config
 
+# In base.py — will be overridden per environment
+CSRF_TRUSTED_ORIGINS = config(
+    'CSRF_TRUSTED_ORIGINS',
+    default='http://localhost:8000,http://127.0.0.1:8000'
+).split(',')
+
 # Build paths
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
@@ -19,6 +25,7 @@ DJANGO_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sitemaps', 
 ]
 
 THIRD_PARTY_APPS = [
