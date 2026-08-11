@@ -217,9 +217,8 @@ portfolio." }}{% endblock %}
 <section id="skills" class="py-24 bg-slate-900/50">
     <div class="max-w-6xl mx-auto px-6">
 
-        {% include 'public/partials/section_header.html' with label="What I Know" title="Skills & Technologies"
-        subtitle="Technologies and tools I work with across software engineering, cloud infrastructure, and DevOps." %}
-
+        {% include 'public/partials/section_header.html' with label="What I Know" title="Skills & Technologies" subtitle="Technologies and tools I work with across software engineering, cloud infrastructure, and DevOps." %}
+        
         {% if skill_categories %}
         <div class="space-y-12">
             {% for category in skill_categories %}
@@ -375,8 +374,7 @@ portfolio." }}{% endblock %}
 <section id="projects" class="py-24 bg-slate-900/50">
     <div class="max-w-6xl mx-auto px-6">
 
-        {% include 'public/partials/section_header.html' with label="My Work" title="Featured Projects" subtitle="A
-        selection of projects that demonstrate my engineering and DevOps skills." %}
+        {% include 'public/partials/section_header.html' with label="My Work" title="Featured Projects" subtitle="A selection of projects that demonstrate my engineering and DevOps skills." %}
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
             {% for project in featured_projects %}
@@ -405,9 +403,8 @@ portfolio." }}{% endblock %}
 <section id="certificates" class="py-24 bg-slate-950">
     <div class="max-w-6xl mx-auto px-6">
 
-        {% include 'public/partials/section_header.html' with label="Credentials" title="Certifications"
-        subtitle="Professional certifications that validate my expertise." %}
-
+        {% include 'public/partials/section_header.html' with label="Credentials" title="Certifications" subtitle="Professional certifications that validate my expertise." %}
+        
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
             {% for cert in featured_certificates %}
             <div class="group bg-slate-900 rounded-xl border border-slate-800 p-5 hover:border-primary-600/50 transition-all duration-300 hover:-translate-y-1 aos"
@@ -462,8 +459,7 @@ portfolio." }}{% endblock %}
 <section id="blog" class="py-24 bg-slate-900/50">
     <div class="max-w-6xl mx-auto px-6">
 
-        {% include 'public/partials/section_header.html' with label="Writing" title="Latest Articles" subtitle="Thoughts
-        on software engineering, cloud architecture, and DevOps practices." %}
+        {% include 'public/partials/section_header.html' with label="Writing" title="Latest Articles" subtitle="Thoughts on software engineering, cloud architecture, and DevOps practices." %}
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
             {% for post in featured_posts %}
