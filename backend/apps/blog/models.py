@@ -8,7 +8,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
 from apps.core.models import TimeStampedModel
-
+from apps.core.validators import validate_image_file
 
 class BlogCategory(TimeStampedModel):
     """
@@ -94,6 +94,7 @@ class BlogPost(TimeStampedModel):
         upload_to='blog/covers/',
         null=True,
         blank=True,
+        validators=[validate_image_file],
     )
     status = models.CharField(
         max_length=20,

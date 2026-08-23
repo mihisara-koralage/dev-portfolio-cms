@@ -4,7 +4,7 @@ Work Experience, and Education.
 """
 from django.db import models
 from apps.core.models import TimeStampedModel
-
+from apps.core.validators import validate_image_file
 
 class SkillCategory(TimeStampedModel):
     """
@@ -126,6 +126,7 @@ class Project(TimeStampedModel):
         upload_to='projects/thumbnails/',
         null=True,
         blank=True,
+        validators=[validate_image_file],
         help_text="Main image shown on the project card."
     )
     github_url = models.URLField(
@@ -215,6 +216,7 @@ class ProjectImage(TimeStampedModel):
     )
     image = models.ImageField(
         upload_to='projects/screenshots/',
+        validators=[validate_image_file],
         help_text="Screenshot or demo image."
     )
     caption = models.CharField(
@@ -270,6 +272,7 @@ class Certificate(TimeStampedModel):
         upload_to='certificates/',
         null=True,
         blank=True,
+        validators=[validate_image_file],
         help_text="Certificate image or badge."
     )
     is_featured = models.BooleanField(
@@ -312,7 +315,8 @@ class WorkExperience(TimeStampedModel):
     company_logo = models.ImageField(
         upload_to='companies/',
         null=True,
-        blank=True
+        blank=True,
+        validators=[validate_image_file],
     )
     is_current = models.BooleanField(
         default=False,
@@ -359,7 +363,8 @@ class Education(TimeStampedModel):
     institution_logo = models.ImageField(
         upload_to='institutions/',
         null=True,
-        blank=True
+        blank=True,
+        validators=[validate_image_file],
     )
     is_current = models.BooleanField(default=False)
     order = models.PositiveSmallIntegerField(default=0)

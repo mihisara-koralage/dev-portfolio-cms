@@ -19,7 +19,8 @@ from apps.portfolio.models import (
 )
 from apps.blog.models import BlogPost, BlogCategory, Tag
 from apps.contact.models import ContactMessage
-
+import logging
+logger = logging.getLogger(__name__)
 
 class HomeView(TemplateView):
     template_name = 'public/home.html'
@@ -149,7 +150,10 @@ class ResumeDownloadView(View):
     def get(self, request):
         profile = UserProfile.objects.first()
         if not profile or not profile.resume:
+            logger.warning('Resume download attempted but no resume uploaded')
             return render(request, 'public/resume_unavailable.html', status=404)
+        
+        logger.info('Resume downloaded by %s', request.META.get('REMOTE_ADDR'))
         return FileResponse(
             profile.resume.open('rb'),
             as_attachment=True,

@@ -9,7 +9,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-
+from apps.core.validators import validate_image_file, validate_pdf_file
 from apps.core.models import TimeStampedModel
 
 
@@ -53,13 +53,15 @@ class UserProfile(TimeStampedModel):
         upload_to='profile/',
         null=True,
         blank=True,
+        validators=[validate_image_file],
         help_text="Profile photo displayed on the homepage."
     )
     resume = models.FileField(
         upload_to='resume/',
         null=True,
         blank=True,
-        help_text="Latest resume PDF. Visitors will always download this version."
+        validators=[validate_pdf_file],
+        help_text="Latest resume PDF."
     )
 
     # Social links

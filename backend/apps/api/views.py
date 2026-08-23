@@ -17,6 +17,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiParameter
 from django.shortcuts import get_object_or_404
+from django_ratelimit.decorators import ratelimit
+from django.utils.decorators import method_decorator
 
 from apps.accounts.models import UserProfile
 from apps.portfolio.models import (
@@ -42,7 +44,8 @@ from .filters import (
     ProjectFilter, SkillFilter,
     CertificateFilter, BlogPostFilter
 )
-
+import logging
+logger = logging.getLogger(__name__)
 
 # ================================================================
 # PROFILE
@@ -457,6 +460,10 @@ class ContactMessageViewSet(
     def get_queryset(self):
         return ContactMessage.objects.none()
 
+    @method_decorator(
+        ratelimit(key='ip', rate='5/h', method='POST', block=True)
+    )
+
     @extend_schema(
         summary='Submit a contact form message',
         responses={
@@ -478,6 +485,12 @@ class ContactMessageViewSet(
         # Capture IP server-side — never trust client-provided IP
         ip_address = self.get_client_ip(request)
         serializer.save(ip_address=ip_address)
+
+        logger.info(
+            'Contact message received from %s (IP: %s)',
+            serializer.data.get('email'),
+            ip_address
+        )
 
         return Response(
             {'detail': 'Message sent successfully. I will get back to you soon.'},
