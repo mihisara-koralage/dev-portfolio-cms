@@ -36,6 +36,8 @@ urlpatterns = [
     # Sitemap
     path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
 
+    path('', include('apps.core.urls')),
+
     # Public frontend — registered last so it catches /
     path('', include('apps.public.urls', namespace='public')),
 ]

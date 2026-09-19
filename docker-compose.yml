@@ -25,7 +25,6 @@ services:
       target: development
     container_name: portfolio_web
     restart: unless-stopped
-    command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - ./backend:/app
       - media_files:/app/media
@@ -33,6 +32,8 @@ services:
       - "8000:8000"
     env_file:
       - .env
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.development
     depends_on:
       db:
         condition: service_healthy
