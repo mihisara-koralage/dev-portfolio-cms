@@ -220,6 +220,7 @@ __marimo__/
 # Secrets
 .env
 *.env
+.env.production
 
 # Django
 backend/media/
@@ -236,4 +237,6 @@ terraform/.terraform.lock.hcl
 
 # OS
 .DS_Store
-Thumbs.db
+Thumbs.db*.sql
+
+*.sql

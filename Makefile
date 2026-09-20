@@ -48,3 +48,37 @@ createsuperuser:
 
 collectstatic:
 	docker compose exec web python manage.py collectstatic --noinput
+
+# ── Production ─────────────────────────────────────────────────
+
+build-prod:
+	docker compose -f docker-compose.prod.yml build
+
+up-prod:
+	docker compose -f docker-compose.prod.yml up -d
+
+down-prod:
+	docker compose -f docker-compose.prod.yml down
+
+logs-prod:
+	docker compose -f docker-compose.prod.yml logs -f
+
+migrate-prod:
+	docker compose -f docker-compose.prod.yml exec web python manage.py migrate
+
+collectstatic-prod:
+	docker compose -f docker-compose.prod.yml exec web python manage.py collectstatic --noinput
+
+shell-prod:
+	docker compose -f docker-compose.prod.yml exec web python manage.py shell
+
+ps-prod:
+	docker compose -f docker-compose.prod.yml ps
+
+# ── Database backup ────────────────────────────────────────────
+
+backup:
+	docker compose -f docker-compose.prod.yml exec db \
+		pg_dump -U $${DB_USER} $${DB_NAME} \
+		> backups/backup_$$(date +%Y%m%d_%H%M%S).sql
+	@echo "Backup saved to backups/"

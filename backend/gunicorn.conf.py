@@ -11,7 +11,8 @@ bind = '0.0.0.0:8000'
 # Workers
 # Formula: (2 × CPU) + 1
 # For t3.micro (1 vCPU) = 3 workers
-workers = multiprocessing.cpu_count() * 2 + 1
+# Cap workers — formula is (2 x CPU) + 1 but max 9 for sanity
+workers = min(multiprocessing.cpu_count() * 2 + 1, 9)
 worker_class = 'sync'
 
 # Use /dev/shm for worker heartbeat files

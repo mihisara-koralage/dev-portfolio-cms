@@ -88,11 +88,10 @@ RUN addgroup --system appgroup && \
     mkdir -p /app/staticfiles /app/media && \
     chown -R appuser:appgroup /app
 
-USER appuser
+# Make entrypoint executable
+RUN chmod +x /app/entrypoint.sh
 
-# Collect static files at build time
-# WhiteNoise will serve these directly — no Nginx static file handling needed
-RUN python manage.py collectstatic --noinput --clear
+USER appuser
 
 EXPOSE 8000
 
@@ -100,6 +99,8 @@ EXPOSE 8000
 # if this fails, and the orchestrator will restart it
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
     CMD curl -f http://localhost:8000/health/ || exit 1
+
+ENTRYPOINT ["/app/entrypoint.sh"]
 
 # Gunicorn: production WSGI server
 # Workers = (2 × CPU cores) + 1 is the standard formula
