@@ -33,11 +33,13 @@ SECURE_HSTS_PRELOAD = True
 
 # Only redirect to HTTPS when actually behind HTTPS
 # Set SECURE_SSL_REDIRECT=True in .env.production on the real server
-SECURE_SSL_REDIRECT = config('SECURE_SSL_REDIRECT', default=False, cast=bool)
+SECURE_SSL_REDIRECT   = config('SECURE_SSL_REDIRECT',   default=False, cast=bool)
 
 # Session and CSRF cookies only sent over HTTPS
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
+# These must be False until HTTPS is configured (Phase 10)
+# Set to True in .env.production after domain + SSL are active
+SESSION_COOKIE_SECURE = config('SESSION_COOKIE_SECURE', default=False, cast=bool)
+CSRF_COOKIE_SECURE    = config('CSRF_COOKIE_SECURE',    default=False, cast=bool)
 
 # Prevent session cookie being accessed by JavaScript
 SESSION_COOKIE_HTTPONLY = True

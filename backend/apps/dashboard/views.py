@@ -194,7 +194,13 @@ class SkillListView(DashboardMixin, TemplateView):
 class SkillCategoryCreateView(DashboardMixin, CreateView):
     model = SkillCategory
     form_class = SkillCategoryForm
+    template_name = 'dashboard/skills/list.html'   # add this
     success_url = reverse_lazy('dashboard:skill-list')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['categories'] = SkillCategory.objects.prefetch_related('skills').all()
+        return context
 
     def form_valid(self, form):
         if not form.instance.slug:

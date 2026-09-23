@@ -115,7 +115,7 @@
 {% endfor %}
 
 <!-- Add category inline form -->
-{% if categories %}
+
 <div class="mt-6 bg-gray-900 rounded-xl border border-gray-800 p-6">
     <h3 class="font-semibold text-white mb-4">Add New Category</h3>
     <form method="post" action="{% url 'dashboard:skill-category-create' %}" class="flex items-end gap-4">
@@ -143,5 +143,5 @@
         </button>
     </form>
 </div>
-{% endif %}
+
 {% endblock %}
