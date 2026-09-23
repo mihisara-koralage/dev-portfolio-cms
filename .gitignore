@@ -240,3 +240,18 @@ terraform/.terraform.lock.hcl
 Thumbs.db*.sql
 
 *.sql
+
+# Terraform
+terraform/.terraform/
+terraform/**/.terraform/
+terraform/*.tfstate
+terraform/**/*.tfstate
+terraform/*.tfstate.backup
+terraform/**/*.tfstate.backup
+terraform/.terraform.lock.hcl
+terraform/**/.terraform.lock.hcl
+terraform/environments/production/terraform.tfvars
+
+# AWS CLI installer (if accidentally downloaded here)
+awscliv2.zip
+aws/

@@ -82,3 +82,21 @@ backup:
 		pg_dump -U $${DB_USER} $${DB_NAME} \
 		> backups/backup_$$(date +%Y%m%d_%H%M%S).sql
 	@echo "Backup saved to backups/"
+
+
+# ── Terraform ──────────────────────────────────────────────────
+
+tf-init:
+	cd terraform/environments/production && terraform init
+
+tf-plan:
+	cd terraform/environments/production && terraform plan
+
+tf-apply:
+	cd terraform/environments/production && terraform apply
+
+tf-destroy:
+	cd terraform/environments/production && terraform destroy
+
+tf-output:
+	cd terraform/environments/production && terraform output
