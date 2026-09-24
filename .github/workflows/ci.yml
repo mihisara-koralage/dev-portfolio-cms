@@ -1,0 +1,140 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+env:
+  PYTHON_VERSION: "3.11"
+  DOCKER_IMAGE: ${{ secrets.DOCKER_USERNAME }}/portfolio-cms
+
+jobs:
+
+  # ============================================================
+  # Job 1: Run tests
+  # ============================================================
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB:       test_portfolio_db
+          POSTGRES_USER:     test_user
+          POSTGRES_PASSWORD: test_password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: backend/requirements/development.txt
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r backend/requirements/development.txt
+
+      - name: Create test environment file
+        run: |
+          cat > backend/.env << EOF
+          SECRET_KEY=ci-test-secret-key-not-used-in-production-abc123
+          DEBUG=True
+          ALLOWED_HOSTS=localhost,127.0.0.1
+          DB_NAME=test_portfolio_db
+          DB_USER=test_user
+          DB_PASSWORD=test_password
+          DB_HOST=localhost
+          DB_PORT=5432
+          CSRF_TRUSTED_ORIGINS=http://localhost
+          EOF
+
+      - name: Run migrations
+        working-directory: backend
+        env:
+          DJANGO_SETTINGS_MODULE: config.settings.development
+        run: python manage.py migrate --noinput
+
+      - name: Run tests
+        working-directory: backend
+        env:
+          DJANGO_SETTINGS_MODULE: config.settings.development
+        run: python manage.py test --verbosity=2
+
+      - name: Check for missing migrations
+        working-directory: backend
+        env:
+          DJANGO_SETTINGS_MODULE: config.settings.development
+        run: python manage.py migrate --check
+
+  # ============================================================
+  # Job 2: Build and push Docker image
+  # Only runs on push to main after tests pass
+  # ============================================================
+  build:
+    name: Build & Push Docker Image
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    outputs:
+      image_tag: ${{ steps.meta.outputs.tags }}
+      image_digest: ${{ steps.build.outputs.digest }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Extract metadata for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.DOCKER_IMAGE }}
+          tags: |
+            type=ref,event=branch
+            type=sha,prefix=sha-
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
+
+      - name: Build and push production image
+        id: build
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          target: production
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Image summary
+        run: |
+          echo "## Docker Image Built" >> $GITHUB_STEP_SUMMARY
+          echo "**Image:** ${{ env.DOCKER_IMAGE }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Tags:** ${{ steps.meta.outputs.tags }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Digest:** ${{ steps.build.outputs.digest }}" >> $GITHUB_STEP_SUMMARY

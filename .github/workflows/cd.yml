@@ -1,0 +1,122 @@
+name: CD
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+
+env:
+  DOCKER_IMAGE: ${{ secrets.DOCKER_USERNAME }}/portfolio-cms
+
+jobs:
+
+  # ============================================================
+  # Deploy to EC2
+  # Only runs if CI workflow succeeded
+  # ============================================================
+  deploy:
+    name: Deploy to EC2
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Copy Nginx config to EC2
+        run: |
+          scp -i ~/.ssh/deploy_key \
+              -o StrictHostKeyChecking=no \
+              nginx/nginx.conf \
+              ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/app/nginx/nginx.conf
+
+          scp -i ~/.ssh/deploy_key \
+              -o StrictHostKeyChecking=no \
+              nginx/conf.d/default.conf \
+              ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/app/nginx/conf.d/default.conf
+
+      - name: Create production env file on EC2
+        run: |
+          ssh -i ~/.ssh/deploy_key \
+              -o StrictHostKeyChecking=no \
+              ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} \
+              "cat > /app/.env.production << 'ENVEOF'
+          SECRET_KEY=${{ secrets.SECRET_KEY }}
+          DEBUG=False
+          ALLOWED_HOSTS=${{ secrets.ALLOWED_HOSTS }}
+          CSRF_TRUSTED_ORIGINS=${{ secrets.CSRF_TRUSTED_ORIGINS }}
+          CORS_ALLOWED_ORIGINS=http://${{ secrets.EC2_HOST }}
+          SECURE_SSL_REDIRECT=False
+          CSRF_COOKIE_SECURE=False
+          SESSION_COOKIE_SECURE=False
+          DB_NAME=${{ secrets.DB_NAME }}
+          DB_USER=${{ secrets.DB_USER }}
+          DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+          DB_HOST=db
+          DB_PORT=5432
+          EMAIL_HOST=smtp.gmail.com
+          EMAIL_PORT=587
+          EMAIL_HOST_USER=
+          EMAIL_HOST_PASSWORD=
+          DEFAULT_FROM_EMAIL=
+          AWS_STORAGE_BUCKET_NAME=portfolio-cms-media-mihisara
+          AWS_S3_REGION_NAME=ap-south-1
+          ENVEOF"
+
+      - name: Copy docker-compose.prod.yml to EC2
+        run: |
+          scp -i ~/.ssh/deploy_key \
+              -o StrictHostKeyChecking=no \
+              docker-compose.prod.yml \
+              ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/app/docker-compose.prod.yml
+
+      - name: Deploy on EC2
+        run: |
+          ssh -i ~/.ssh/deploy_key \
+              -o StrictHostKeyChecking=no \
+              ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'SSHEOF'
+
+            cd /app
+
+            # Pull latest image
+            docker pull ${{ env.DOCKER_IMAGE }}:latest
+
+            # Restart containers
+            docker compose -f docker-compose.prod.yml down
+            docker compose -f docker-compose.prod.yml up -d
+
+            # Wait for health check
+            echo "Waiting for containers to be healthy..."
+            sleep 30
+
+            # Verify deployment
+            docker compose -f docker-compose.prod.yml ps
+
+            # Check health endpoint
+            curl -f http://localhost/health/ || exit 1
+
+            echo "Deployment successful!"
+          SSHEOF
+
+      - name: Deployment summary
+        if: success()
+        run: |
+          echo "## Deployment Successful" >> $GITHUB_STEP_SUMMARY
+          echo "**Server:** ${{ secrets.EC2_HOST }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Image:** ${{ env.DOCKER_IMAGE }}:latest" >> $GITHUB_STEP_SUMMARY
+          echo "**URL:** http://${{ secrets.EC2_HOST }}" >> $GITHUB_STEP_SUMMARY
+
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "## Deployment Failed" >> $GITHUB_STEP_SUMMARY
+          echo "Check the logs above for details." >> $GITHUB_STEP_SUMMARY
+          echo "The previous version is still running on the server." >> $GITHUB_STEP_SUMMARY
