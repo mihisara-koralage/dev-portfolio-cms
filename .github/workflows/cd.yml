@@ -89,18 +89,26 @@ jobs:
             # Pull latest image
             docker pull ${{ env.DOCKER_IMAGE }}:latest
 
-            # Restart containers
-            docker compose -f docker-compose.prod.yml down
-            docker compose -f docker-compose.prod.yml up -d
+            # Bring down existing containers
+            docker compose \
+              --env-file /app/.env.production \
+              -f docker-compose.prod.yml down
 
-            # Wait for health check
+            # Start containers with env file so ${DB_NAME} etc. resolve
+            docker compose \
+              --env-file /app/.env.production \
+              -f docker-compose.prod.yml up -d
+
+            # Wait for health checks to pass
             echo "Waiting for containers to be healthy..."
             sleep 30
 
-            # Verify deployment
-            docker compose -f docker-compose.prod.yml ps
+            # Show container status
+            docker compose \
+              --env-file /app/.env.production \
+              -f docker-compose.prod.yml ps
 
-            # Check health endpoint
+            # Verify health endpoint
             curl -f http://localhost/health/ || exit 1
 
             echo "Deployment successful!"
