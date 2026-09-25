@@ -152,12 +152,14 @@ LOGGING = {
 }
 
 # ----------------------------------------------------------------
-# Cache (production — override in Phase 8 with Redis/ElastiCache)
+# Cache
+# Using local memory cache for rate limiting
+# Upgrade to Redis/ElastiCache for multi-instance deployments
 # ----------------------------------------------------------------
 CACHES = {
     'default': {
-        'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
-        'LOCATION': 'cache_table',
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'portfolio-cache',
     }
 }
 
