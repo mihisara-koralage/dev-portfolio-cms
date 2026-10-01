@@ -171,8 +171,8 @@ git push origin main
 
 **Ratings:**
 
-- **SSL:** A ([ssllabs.com](https://www.ssllabs.com))
-- **Security Headers:** A ([securityheaders.com](https://securityheaders.com))
+- **SSL:** A ([ssllabs.com](https://www.ssllabs.com/ssltest/analyze.html?d=mihisara.online))
+- **Security Headers:** A ([securityheaders.com](https://securityheaders.com/?q=https%3A%2F%2Fmihisara.online&followRedirects=on))
 
 ---
 
